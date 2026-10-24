@@ -1,0 +1,276 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MetricTrust | KPI Trends & Analysis</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <div class="app-layout">
+
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-mark">M</div>
+                <div>
+                    <h2>MetricTrust</h2>
+                    <p>Analytics Integrity</p>
+                </div>
+            </div>
+
+            <p class="nav-label">WORKSPACE</p>
+
+            <nav class="navigation">
+                <a class="nav-link" href="/">Analytics Overview</a>
+                <a class="nav-link active" href="/trends">KPI Trends & Analysis</a>
+                <a class="nav-link" href="/investigations">Investigations & Reconciliation</a>
+                <a class="nav-link" href="/definitions">Definition History</a>
+                <a class="nav-link" href="/quality">Data Quality & Reports</a>
+                <a class="nav-link" href="/assistant">MetricTrust AI Assistant</a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <span class="status-dot"></span>
+                Local analytics environment
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div>
+                    <p class="eyebrow">PERFORMANCE MONITORING / ANALYSIS</p>
+                    <h1>KPI Trends & Analysis</h1>
+                </div>
+                <div class="environment-tag">SAMPLE DATA</div>
+            </header>
+
+            <section class="welcome-row">
+                <div>
+                    <h2>Understand what moved — and when.</h2>
+                    <p>Analyze monthly KPI movement and identify periods that need investigation.</p>
+                </div>
+                <div class="mini-tag">NYC 311 · 2023–2025 sample</div>
+            </section>
+
+            <section class="kpi-grid">
+                <article class="kpi-card">
+                    <p>Total sample requests</p>
+                    <h2 id="trendTotal">—</h2>
+                    <span>Across the monthly sample</span>
+                </article>
+
+                <article class="kpi-card">
+                    <p>Weighted closure rate</p>
+                    <h2 id="trendClosure">—</h2>
+                    <span>Closed requests ÷ total requests</span>
+                </article>
+
+                <article class="kpi-card">
+                    <p>Monthly records</p>
+                    <h2 id="trendMonths">—</h2>
+                    <span>Records returned by the database</span>
+                </article>
+
+                <article class="kpi-card">
+                   <p>Missing closure dates</p>
+                    <h2 id="trendQuality">—</h2>
+                    <span>Records with no closure date</span>
+                </article>
+            </section>
+
+            <section class="panel">
+                <div class="panel-header">
+                    <div>
+                        <p class="eyebrow">TREND EXPLORER</p>
+                        <h2>Monthly KPI movement</h2>
+                    </div>
+
+                    <label for="trendMetric">Select metric</label>
+                    <select id="trendMetric">
+                        <option value="closure_rate_pct">Closure rate (%)</option>
+                        <option value="total_requests">Total requests</option>
+                        <option value="closed_requests">Closed requests</option>
+                        <option value="missing_closed_dates">Missing closure dates</option>
+                    </select>
+                </div>
+
+                <p id="trendStatus" role="status">Loading KPI data…</p>
+
+                <div class="chart-container">
+                    <canvas id="trendChart"></canvas>
+                </div>
+
+                <p class="footnote">
+                    Sample-based metrics are not citywide request totals.
+                    Investigate changes before attributing a cause.
+                </p>
+            </section>
+
+            <section class="panel">
+                <p class="eyebrow">ANALYST WORKSPACE</p>
+                <h2>How to interpret a KPI change</h2>
+
+                <div class="signal-row">
+                    <div class="signal-copy">
+                        <strong>1. Performance change</strong>
+                        <p>Check whether the KPI movement exceeds your chosen threshold.</p>
+                    </div>
+                </div>
+
+                <div class="signal-row">
+                    <div class="signal-copy">
+                        <strong>2. Definition change</strong>
+                        <p>Check whether the metric formula or reporting rules changed.</p>
+                    </div>
+                </div>
+
+                <div class="signal-row">
+                    <div class="signal-copy">
+                        <strong>3. Data quality change</strong>
+                        <p>Check missing dates, unexpected values and record completeness.</p>
+                    </div>
+                </div>
+
+                <div class="notice">
+                    <strong>Important</strong>
+                    <p>A change in a chart is a signal to investigate, not proof of its root cause.</p>
+                </div>
+            </section>
+
+            <footer class="page-footer">
+                MetricTrust · KPI Drift & Reconciliation Auditor
+            </footer>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let trendChartInstance = null;
+        let trendRows = [];
+
+        const metricLabels = {
+            closure_rate_pct: "Closure rate (%)",
+            total_requests: "Total requests",
+            closed_requests: "Closed requests",
+            missing_closed_dates: "Missing closure dates"
+        };
+
+        async function loadTrendData() {
+            const status = document.getElementById("trendStatus");
+
+            try {
+                const response = await fetch("/api/monthly-kpis");
+
+                if (!response.ok) {
+                    throw new Error("API returned status " + response.status);
+                }
+
+                const payload = await response.json();
+                trendRows = Array.isArray(payload)
+                    ? payload
+                    : (payload.data || payload.records || []);
+
+                if (!trendRows.length) {
+                    status.textContent = "No monthly KPI records were returned.";
+                    return;
+                }
+
+                const total = trendRows.reduce(
+                    (sum, row) => sum + Number(row.total_requests || 0), 0
+                );
+                const closed = trendRows.reduce(
+                    (sum, row) => sum + Number(row.closed_requests || 0), 0
+                );
+                const missing = trendRows.reduce(
+                    (sum, row) => sum + Number(row.missing_closed_dates || 0), 0
+                );
+
+                document.getElementById("trendTotal").textContent =
+                    total.toLocaleString("en-US");
+
+                document.getElementById("trendClosure").textContent =
+                    total ? (closed / total * 100).toFixed(2) + "%" : "N/A";
+
+                document.getElementById("trendMonths").textContent =
+                    trendRows.length.toLocaleString("en-US");
+
+                document.getElementById("trendQuality").textContent =
+                    missing.toLocaleString("en-US");
+
+                status.textContent =
+                    trendRows.length + " monthly records loaded from MetricTrust database.";
+
+                renderTrendChart();
+            } catch (error) {
+                status.textContent =
+                    "Could not load KPI data. Check the Flask server and monthly KPI API.";
+                console.error("MetricTrust trend error:", error);
+            }
+        }
+
+        function renderTrendChart() {
+            const metric = document.getElementById("trendMetric").value;
+            const canvas = document.getElementById("trendChart");
+
+            if (trendChartInstance) {
+                trendChartInstance.destroy();
+            }
+
+            if (typeof Chart === "undefined") {
+                document.getElementById("trendStatus").textContent =
+                    "Chart library could not load. Check your internet connection.";
+                return;
+            }
+
+            trendChartInstance = new Chart(canvas, {
+                type: "line",
+                data: {
+                    labels: trendRows.map(row => row.month),
+                    datasets: [{
+                        label: metricLabels[metric],
+                        data: trendRows.map(row => Number(row[metric] ?? 0)),
+                        borderColor: "#586F7C",
+                        backgroundColor: "rgba(184, 219, 217, 0.45)",
+                        pointBackgroundColor: "#04724D",
+                        pointBorderColor: "#586F7C",
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        fill: true,
+                        tension: 0.25
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: "index"
+                    },
+                    plugins: {
+                        legend: { display: true },
+                        tooltip: { enabled: true }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { maxTicksLimit: 12, maxRotation: 45 }
+                        },
+                        y: {
+                            beginAtZero: metric !== "closure_rate_pct"
+                        }
+                    }
+                }
+            });
+        }
+
+        document.getElementById("trendMetric").addEventListener(
+            "change", renderTrendChart
+        );
+
+        loadTrendData();
+    </script>
+</body>
+</html>

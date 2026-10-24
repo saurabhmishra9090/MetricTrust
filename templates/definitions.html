@@ -1,0 +1,300 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Definition History | MetricTrust</title>
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: #F4F4F9;
+            color: #000;
+            font-family: Arial, sans-serif;
+        }
+
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            flex-shrink: 0;
+            background: #000;
+            color: #F4F4F9;
+            padding: 28px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 48px;
+        }
+
+        .brand-mark {
+            width: 48px;
+            height: 48px;
+            border-radius: 13px;
+            background: #B8DBD9;
+            color: #000;
+            display: grid;
+            place-items: center;
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+        .brand h2 { font-size: 21px; margin: 0 0 5px; }
+        .brand p { font-size: 12px; color: #B8DBD9; margin: 0; }
+
+        .nav-label {
+            color: #B8DBD9;
+            font-size: 11px;
+            letter-spacing: 2px;
+            font-weight: bold;
+            margin: 0 14px 14px;
+        }
+
+        .navigation {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 15px 14px;
+            color: #D7DEE2;
+            text-decoration: none;
+            border-radius: 11px;
+            font-size: 14px;
+        }
+
+        .nav-link:hover { background: #253039; }
+
+        .nav-link.active {
+            background: #B8DBD9;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid #38434A;
+            color: #D7DEE2;
+            font-size: 12px;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 9px;
+            height: 9px;
+            background: #B8DBD9;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .main-content {
+            flex: 1;
+            min-width: 0;
+            padding: 36px 40px;
+        }
+
+        .topbar {
+            border-bottom: 1px solid #DDE2E8;
+            padding-bottom: 24px;
+            margin-bottom: 30px;
+        }
+
+        .eyebrow {
+            color: #586F7C;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        h1 { font-size: 36px; margin: 12px 0; }
+        h2 { font-size: 24px; }
+
+        .intro {
+            color: #586F7C;
+            line-height: 1.6;
+        }
+
+        .panel {
+            background: #FFF;
+            border: 1px solid #DDE2E8;
+            border-radius: 17px;
+            padding: 28px;
+            margin-bottom: 24px;
+        }
+
+        .notice {
+            background: #B8DBD9;
+            border-radius: 12px;
+            padding: 20px;
+            line-height: 1.6;
+            margin: 24px 0;
+        }
+
+        .table-wrap { overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 17px 14px;
+            border-bottom: 1px solid #DDE2E8;
+        }
+
+        th { color: #586F7C; }
+
+        .status {
+            color: #04724D;
+            font-weight: bold;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 24px;
+            color: #04724D;
+        }
+
+        .page-footer {
+            color: #586F7C;
+            font-size: 12px;
+            margin-top: 28px;
+        }
+
+        @media (max-width: 800px) {
+            .app-layout { flex-direction: column; }
+            .sidebar { width: 100%; }
+            .brand { margin-bottom: 25px; }
+            .main-content { padding: 22px 16px; }
+            h1 { font-size: 29px; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-layout">
+
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-mark">M</div>
+            <div>
+                <h2>MetricTrust</h2>
+                <p>Analytics Integrity</p>
+            </div>
+        </div>
+
+        <p class="nav-label">WORKSPACE</p>
+
+        <nav class="navigation">
+            <a class="nav-link" href="/">Analytics Overview</a>
+            <a class="nav-link" href="/trends">KPI Trends &amp; Analysis</a>
+            <a class="nav-link" href="/investigations">Investigations &amp; Reconciliation</a>
+            <a class="nav-link active" href="/definitions">Definition History</a>
+            <a class="nav-link" href="/quality">Data Quality &amp; Reports</a>
+            <a class="nav-link" href="/assistant">MetricTrust AI Assistant</a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <span class="status-dot"></span>
+            Local analytics environment
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <p class="eyebrow">METRIC GOVERNANCE / REGISTRY</p>
+            <h1>Definition History</h1>
+            <p class="intro">
+                Track KPI formulas, reporting rules and registered definition versions.
+            </p>
+        </header>
+
+        <section class="panel">
+            <div class="notice">
+                <strong>Registry status</strong><br>
+                 Metric definitions are loaded from the MetricTrust registry. Review version changes and effective dates before interpreting KPI movement.
+                  Synthetic test changes are explicitly identified.
+            </div>
+
+            <h2>Metric definition registry</h2>
+
+            
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Metric ID</th>
+                <th>Metric name</th>
+                <th>Version</th>
+                <th>Formula definition</th>
+                <th>Aggregation grain</th>
+                <th>Effective from</th>
+                <th>Effective to</th>
+                <th>Current version</th>
+                <th>Change reason</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in definitions %}
+            <tr>
+                <td>{{ item.metric_id }}</td>
+                <td>{{ item.metric_name }}</td>
+                <td>v{{ item.version }}</td>
+                <td>{{ item.formula_definition }}</td>
+                <td>{{ item.aggregation_grain }}</td>
+                <td>{{ item.effective_from or "Not set" }}</td>
+                <td>{{ item.effective_to or "Current" }}</td>
+                <td>
+                    {% if item.is_current %}
+                        <span class="status">Current</span>
+                    {% else %}
+                        Historical
+                    {% endif %}
+                </td>
+                <td>
+                    {{ item.change_reason or "No reason recorded" }}
+                    {% if item.change_reason and "SYNTHETIC TEST" in item.change_reason %}
+                        <strong> — Synthetic test</strong>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="9">No metric definitions found in the registry.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<p class="intro">
+    Definitions are loaded from the MetricTrust metric registry.
+    Synthetic test changes are explicitly labelled and should not be
+    interpreted as confirmed real-world business changes.
+</p>
+
+
+            <a class="back-link" href="/">Return to Analytics Overview</a>
+        </section>
+
+        <footer class="page-footer">
+            MetricTrust · KPI Drift &amp; Reconciliation Auditor
+        </footer>
+    </main>
+
+</div>
+</body>
+</html>

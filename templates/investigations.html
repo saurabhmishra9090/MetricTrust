@@ -1,0 +1,258 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MetricTrust | Investigations & Reconciliation</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="app-layout">
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-mark">M</div>
+            <div>
+                <h2>MetricTrust</h2>
+                <p>Analytics Integrity</p>
+            </div>
+        </div>
+
+        <p class="nav-label">WORKSPACE</p>
+        <nav class="navigation">
+            <a class="nav-link" href="/">Analytics Overview</a>
+            <a class="nav-link" href="/trends">KPI Trends & Analysis</a>
+            <a class="nav-link active" href="/investigations">Investigations & Reconciliation</a>
+            <a class="nav-link" href="/definitions">Definition History</a>
+            <a class="nav-link" href="/quality">Data Quality & Reports</a>
+            <a class="nav-link" href="/assistant">MetricTrust AI Assistant</a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <span class="status-dot"></span>
+            Local analytics environment
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <div>
+                <p class="eyebrow">METRIC GOVERNANCE / INVESTIGATIONS</p>
+                <h1>Investigations & Reconciliation</h1>
+            </div>
+            <div class="environment-tag">SAMPLE DATA</div>
+        </header>
+
+        <section class="welcome-row">
+            <div>
+                <h2>Find the reason behind KPI movement.</h2>
+                <p>Review potential performance drift, data-quality issues and metric-definition changes.</p>
+            </div>
+            <div class="mini-tag">Investigation workspace</div>
+        </section>
+
+        <section class="kpi-grid">
+            <article class="kpi-card">
+                <p>Investigation candidates</p>
+                <h2 id="candidateCount">—</h2>
+                <span>Records requiring review</span>
+            </article>
+            <article class="kpi-card">
+                <p>Missing closure dates</p>
+                <h2 id="missingCount">—</h2>
+                <span>Across monthly sample records</span>
+            </article>
+            <article class="kpi-card">
+                <p>Reconciliation rules</p>
+                <h2>Pending</h2>
+                <span>Registry integration required</span>
+            </article>
+            <article class="kpi-card">
+                <p>Case status</p>
+                <h2>Not assessed</h2>
+                <span>No case status inferred</span>
+            </article>
+        </section>
+
+        <section class="panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">INVESTIGATION QUEUE</p>
+                    <h2>Review monthly KPI records</h2>
+                </div>
+                <button class="mini-tag" id="refreshInvestigations" type="button">Refresh data</button>
+            </div>
+
+            <div class="chart-filters">
+                <label for="caseSearch">Search month</label>
+                <input id="caseSearch" type="search" placeholder="e.g. 2024-01">
+
+                <label for="issueFilter">Issue type</label>
+                <select id="issueFilter">
+                    <option value="all">All records</option>
+                    <option value="missing">Missing closure dates</option>
+                    <option value="complete">No missing closure dates</option>
+                </select>
+            </div>
+
+            <p id="investigationStatus" role="status">Loading monthly records…</p>
+
+            <div style="width:100%; overflow-x:auto;">
+                <table style="width:100%; border-collapse:collapse; text-align:left;">
+                    <thead>
+                        <tr>
+                            <th style="padding:14px;">Month</th>
+                            <th style="padding:14px;">Total requests</th>
+                            <th style="padding:14px;">Closed requests</th>
+                            <th style="padding:14px;">Closure rate</th>
+                            <th style="padding:14px;">Missing dates</th>
+                            <th style="padding:14px;">Review signal</th>
+                        </tr>
+                    </thead>
+                    <tbody id="investigationRows">
+                        <tr>
+                            <td colspan="6" style="padding:16px;">Loading records…</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="footnote">
+                Monthly aggregates are not individual case evidence. A missing-date count is a
+                data-quality indicator, not proof of a root cause.
+            </p>
+        </section>
+
+        <section class="panel">
+            <p class="eyebrow">RECONCILIATION WORKFLOW</p>
+            <h2>Investigation procedure</h2>
+
+            <div class="signal-row">
+                <div class="signal-copy">
+                    <strong>1. Validate the metric</strong>
+                    <p>Confirm the metric formula, reporting period and aggregation grain.</p>
+                </div>
+            </div>
+            <div class="signal-row">
+                <div class="signal-copy">
+                    <strong>2. Check data quality</strong>
+                    <p>Inspect missing dates and invalid records before interpreting movement.</p>
+                </div>
+            </div>
+            <div class="signal-row">
+                <div class="signal-copy">
+                    <strong>3. Record the finding</strong>
+                    <p>Document the evidence and root cause only after validation.</p>
+                </div>
+            </div>
+
+            <div class="notice">
+                <strong>Evidence first</strong>
+                <p>This page displays monthly aggregates. Individual case assignments, notes and statuses will require a case-management data model.</p>
+            </div>
+        </section>
+
+        <footer class="page-footer">
+            MetricTrust · KPI Drift & Reconciliation Auditor
+        </footer>
+    </main>
+</div>
+
+<script>
+let investigationData = [];
+
+const numberFormat = value => Number(value || 0).toLocaleString("en-US");
+
+async function loadInvestigations() {
+    const status = document.getElementById("investigationStatus");
+    const tbody = document.getElementById("investigationRows");
+
+    status.textContent = "Loading monthly KPI records…";
+
+    try {
+        const response = await fetch("/api/monthly-kpis");
+        if (!response.ok) throw new Error("API returned " + response.status);
+
+        const payload = await response.json();
+        console.log("Investigation payload:", payload);
+        investigationData = Array.isArray(payload)
+            ? payload
+            : (payload.data || payload.records || []);
+
+        document.getElementById("candidateCount").textContent =
+            numberFormat(investigationData.length);
+
+        const missingTotal = investigationData.reduce(
+            (sum, row) => sum + Number(row.missing_closed_dates || 0), 0
+        );
+        document.getElementById("missingCount").textContent =
+            numberFormat(missingTotal);
+
+        status.textContent =
+            investigationData.length + " monthly records loaded. Review signals are based on available aggregates.";
+
+        renderInvestigationRows();
+    } catch (error) {
+        console.error("Investigation data error:", error);
+        status.textContent =
+            "Could not load records. Check the Flask server and /api/monthly-kpis endpoint.";
+        tbody.innerHTML =
+            '<tr><td colspan="6" style="padding:16px;">Data unavailable — no investigation result has been assumed.</td></tr>';
+        document.getElementById("candidateCount").textContent = "N/A";
+        document.getElementById("missingCount").textContent = "N/A";
+    }
+}
+
+function renderInvestigationRows() {
+    const search = document.getElementById("caseSearch").value.trim().toLowerCase();
+    const issue = document.getElementById("issueFilter").value;
+    const tbody = document.getElementById("investigationRows");
+
+    const filtered = investigationData.filter(row => {
+        const month = String(row.month || "").toLowerCase();
+        const missing = Number(row.missing_closed_dates || 0);
+
+        return month.includes(search) &&
+            (issue === "all" ||
+             (issue === "missing" && missing > 0) ||
+             (issue === "complete" && missing === 0));
+    });
+
+    if (!filtered.length) {
+        tbody.innerHTML =
+            '<tr><td colspan="6" style="padding:16px;">No records match these filters.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = filtered.map(row => {
+        const missing = Number(row.missing_closed_dates || 0);
+        const rate = Number(row.closure_rate_pct || 0);
+        const signal = missing > 0 ? "Review data quality" : "No missing dates flagged";
+
+        return `<tr>
+            <td style="padding:14px;">${escapeHTML(row.month ?? "—")}</td>
+            <td style="padding:14px;">${numberFormat(row.total_requests)}</td>
+            <td style="padding:14px;">${numberFormat(row.closed_requests)}</td>
+            <td style="padding:14px;">${rate.toFixed(2)}%</td>
+            <td style="padding:14px;">${numberFormat(missing)}</td>
+            <td style="padding:14px;">${signal}</td>
+        </tr>`;
+    }).join("");
+}
+
+function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, char => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;",
+        '"': "&quot;", "'": "&#39;"
+    })[char]);
+}
+
+document.getElementById("caseSearch").addEventListener("input", renderInvestigationRows);
+document.getElementById("issueFilter").addEventListener("change", renderInvestigationRows);
+document.getElementById("refreshInvestigations").addEventListener("click", loadInvestigations);
+
+loadInvestigations();
+</script>
+</body>
+</html>

@@ -1,0 +1,199 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MetricTrust | KPI Investigation</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+    
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+<body>
+    <div class="app-shell">
+
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-mark">M</div>
+                <div>
+                    <h2>MetricTrust</h2>
+                    <p>Analytics Integrity</p>
+                </div>
+            </div>
+
+            <p class="nav-label">WORKSPACE</p>
+            
+<nav class="navigation">
+    
+<a class="nav-link active" href="/">Analytics Overview</a>
+<a class="nav-link" href="/trends">KPI Trends & Analysis</a>
+<a class="nav-link" href="/investigations">Investigations & Reconciliation</a>
+<a class="nav-link" href="/definitions">Definition History</a>
+<a class="nav-link" href="/quality">Data Quality & Reports</a>
+<a class="nav-link" href="/assistant">MetricTrust AI Assistant</a>
+
+</nav>
+
+
+            <div class="sidebar-footer">
+                <span class="status-dot"></span>
+                Local analytics environment
+            </div>
+        </aside>
+
+        <main class="main-content" id="overview">
+            <header class="topbar">
+                <div>
+                    <p class="eyebrow">METRIC GOVERNANCE / OVERVIEW</p>
+                    <h1>Analytics Overview</h1>
+                </div>
+                <div class="environment-tag">SAMPLE DATA</div>
+            </header>
+
+            <section class="welcome-row">
+                <div>
+                    <h2>Know what changed. Understand why.</h2>
+                    <p>Monitor KPI movement, definition changes and data quality signals.</p>
+                </div>
+                <div class="date-chip">NYC 311 · 2023–2025 sample</div>
+            </section>
+
+            <section class="kpi-grid">
+                <article class="kpi-card">
+                    <div class="kpi-heading">
+                        <span>Total sample requests</span>
+                        <span class="kpi-icon aqua">#</span>
+                    </div>
+                    <h3>{{ "{:,}".format(summary.total_requests) }}</h3>
+                    <p>Monthly sample counts summed</p>
+                </article>
+
+                <article class="kpi-card">
+                    <div class="kpi-heading">
+                        <span>Weighted closure rate</span>
+                        <span class="kpi-icon green">%</span>
+                    </div>
+                    <h3>{{ "%.2f"|format(summary.closure_rate) }}%</h3>
+                    <p>Calculated from current sample</p>
+                </article>
+
+                <article class="kpi-card">
+                    <div class="kpi-heading">
+                        <span>Performance signals</span>
+                        <span class="kpi-icon amber">↗</span>
+                    </div>
+                    <h3>{{ summary.performance_signals }}</h3>
+                    <p>Configured threshold crossings</p>
+                </article>
+
+                <article class="kpi-card">
+                    <div class="kpi-heading">
+                        <span>Data quality signals</span>
+                        <span class="kpi-icon slate">!</span>
+                    </div>
+                    <h3>{{ summary.data_quality_signals }}</h3>
+                    <p>Missing-date rate changes</p>
+                </article>
+            </section>
+
+            <section class="content-grid" id="trends">
+                <article class="panel trend-panel">
+                    <div class="panel-header">
+                        <div>
+                            <p class="eyebrow">PERFORMANCE MONITORING</p>
+                            <h2>Monthly closure rate</h2>
+                        </div>
+                        <span class="mini-tag">Sample-level</span>
+                    </div>
+                    
+<div class="chart-container">
+    <div class="chart-filters">
+        <label for="chartMetric">Metric</label>
+        <select id="chartMetric">
+            <option value="closure_rate_pct">Closure rate (%)</option>
+            <option value="total_requests">Total requests</option>
+            <option value="closed_requests">Closed requests</option>
+            <option value="missing_closed_dates">Missing closure dates</option>
+        </select>
+    </div>
+
+    <p id="chartStatus" role="status">Loading monthly KPI data...</p>
+
+    <div class="chart-canvas-wrap">
+        <canvas id="monthlyKpiChart"></canvas>
+    </div>
+</div>
+                     
+                    <p class="footnote">
+                        Capped monthly samples are not citywide request totals.
+                    </p>
+                </article>
+
+                <article class="panel signal-panel" id="investigations">
+                    <div class="panel-header">
+                        <div>
+                            <p class="eyebrow">INVESTIGATION QUEUE</p>
+                            <h2>Detected signals</h2>
+                        </div>
+                        <span class="mini-tag">Review</span>
+                    </div>
+
+                    <div class="signal-row">
+                        <span class="signal-indicator amber"></span>
+                        <div class="signal-copy">
+                            <strong>Performance drift signals</strong>
+                            <p>Monthly closure-rate changes</p>
+                        </div>
+                        <span class="signal-count">{{ summary.performance_signals }}</span>
+                    </div>
+
+                    <div class="signal-row">
+                        <span class="signal-indicator slate"></span>
+                        <div class="signal-copy">
+                            <strong>Data quality signals</strong>
+                            <p>Missing closure-date rate changes</p>
+                        </div>
+                        <span class="signal-count">{{ summary.data_quality_signals }}</span>
+                    </div>
+
+                    <div class="signal-row" id="definitions">
+                        <span class="signal-indicator aqua"></span>
+                        <div class="signal-copy">
+                            <strong>Definition changes</strong>
+                            <p>Registered formula changes</p>
+                        </div>
+                        <span class="signal-count">{{ summary.definition_changes }}</span>
+                    </div>
+
+                    <div class="review-note">
+                        <strong>Interpret carefully</strong>
+                        <p>Signals identify items to investigate; they do not prove root cause.</p>
+                    </div>
+                </article>
+            </section>
+
+            <section class="panel quality-panel" id="quality">
+                <div>
+                    <p class="eyebrow">DATA GOVERNANCE</p>
+                    <h2>Quality & reconciliation</h2>
+                    <p>Review missing dates, invalid records and rule violations before interpreting KPI movement.</p>
+                </div>
+                <div class="quality-status">
+                    <span class="status-dot"></span>
+                    <span>Sample audit available</span>
+                </div>
+            </section>
+
+            <footer class="page-footer">
+                <span>MetricTrust · KPI Drift & Reconciliation Auditor</span>
+                <span>Development build · Sample data</span>
+            </footer>
+        </main>
+    </div>
+ 
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+   
+</body>
+</html>

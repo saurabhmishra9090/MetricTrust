@@ -1,0 +1,26 @@
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+.venv/
+venv/
+.env
+
+# Local database
+*.duckdb
+*.duckdb.wal
+
+# Raw and processed data
+data/raw/
+data/processed/
+
+# Generated reports and charts
+reports/*.csv
+reports/*.png
+reports/*.jpg
+
+# Editor and OS
+.vscode/
+.DS_Store
+Thumbs.db

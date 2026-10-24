@@ -1,0 +1,185 @@
+
+from flask import Flask, render_template, jsonify
+from pathlib import Path
+import duckdb
+
+app = Flask(__name__)
+
+DB_FILE = Path(__file__).resolve().parent / "data" / "metrictrust.duckdb"
+
+
+def fetch_dashboard_data():
+    if not DB_FILE.exists():
+        raise FileNotFoundError("MetricTrust database was not found.")
+
+    con = duckdb.connect(str(DB_FILE), read_only=True)
+
+    try:
+        monthly = con.execute("""
+            SELECT
+                month,
+                total_requests,
+                closed_requests,
+                missing_closed_dates,
+                closure_rate_pct
+            FROM monthly_kpi_results
+            ORDER BY month
+        """).fetchdf()
+
+        return monthly
+
+    finally:
+        con.close()
+
+
+# MetricTrust dedicated workspace routes
+
+@app.route("/trends")
+def trends():
+    return render_template("trends.html")
+
+
+@app.route("/investigations")
+def investigations():
+    return render_template("investigations.html")
+
+
+@app.route("/definitions")
+def definitions():
+    if not DB_FILE.exists():
+        return "MetricTrust database was not found.", 500
+
+    con = duckdb.connect(str(DB_FILE), read_only=True)
+
+    try:
+        definitions_df = con.execute("""
+            SELECT
+                metric_id,
+                metric_name,
+                metric_description,
+                formula_definition,
+                aggregation_grain,
+                version,
+                effective_from,
+                effective_to,
+                is_current,
+                change_reason
+            FROM metric_registry
+            ORDER BY metric_id, version
+        """).fetchdf()
+
+        definitions = definitions_df.to_dict(orient="records")
+
+        for item in definitions:
+            for field in ("effective_from", "effective_to"):
+                value = item.get(field)
+
+                if value is None or str(value) in ("NaT", "nan", "None", ""):
+                    item[field] = (
+                        "Open-ended"
+                        if field == "effective_to"
+                        else "Not set"
+                    )
+                else:
+                    item[field] = str(value)[:10]
+
+            # Display Boolean values clearly in the template.
+            item["is_current"] = bool(item.get("is_current", False))
+
+        return render_template(
+            "definitions.html",
+            definitions=definitions
+        )
+
+    except Exception:
+        app.logger.exception("Definition history page failed")
+        return "Unable to load metric definitions. Check the Flask terminal.", 500
+
+    finally:
+        con.close()
+
+
+@app.route("/quality")
+def quality():
+    return render_template("quality.html")
+
+
+@app.route("/assistant")
+def assistant():
+    return render_template("assistant.html")
+
+
+@app.route("/")
+def dashboard():
+    try:
+        monthly = fetch_dashboard_data()
+
+       
+        signal_con = duckdb.connect(str(DB_FILE), read_only=True)
+
+        try:
+            signal_counts = signal_con.execute("""
+                SELECT
+                    COALESCE(SUM(CASE
+                        WHEN performance_signal THEN 1 ELSE 0
+                    END), 0) AS performance_signals,
+                    COALESCE(SUM(CASE
+                        WHEN data_quality_signal THEN 1 ELSE 0
+                    END), 0) AS data_quality_signals
+                FROM drift_results
+            """).fetchone()
+
+            definition_changes = signal_con.execute("""
+                SELECT COUNT(*)
+                FROM (
+                    SELECT metric_id
+                    FROM metric_registry
+                    GROUP BY metric_id
+                    HAVING COUNT(*) > 1
+                ) AS versioned_metrics
+            """).fetchone()[0]
+
+        finally:
+            signal_con.close()
+
+        summary = {
+            "total_requests": int(monthly["total_requests"].sum()),
+            "closed_requests": int(monthly["closed_requests"].sum()),
+            "performance_signals": int(signal_counts[0] or 0),
+            "data_quality_signals": int(signal_counts[1] or 0),
+            "definition_changes": int(definition_changes or 0),
+        }
+
+
+        if summary["total_requests"] > 0:
+            summary["closure_rate"] = round(
+                summary["closed_requests"]
+                / summary["total_requests"] * 100,
+                2
+            )
+        else:
+            summary["closure_rate"] = 0
+
+        return render_template(
+            "index.html",
+            summary=summary
+        )
+
+    except Exception as exc:
+        app.logger.exception("Dashboard data loading failed")
+        return f"Dashboard data error: {exc}", 500
+
+
+@app.route("/api/monthly-kpis")
+def monthly_kpis():
+    try:
+        monthly = fetch_dashboard_data()
+        return jsonify(monthly.to_dict(orient="records"))
+
+    except Exception:
+        app.logger.exception("Monthly KPI API failed")
+        return jsonify({"error": "Unable to load monthly KPI data"}), 500
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
