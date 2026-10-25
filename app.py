@@ -2,6 +2,8 @@
 from flask import Flask, render_template, jsonify
 from pathlib import Path
 import duckdb
+import pandas as pd
+from src.metric_logic import find_mt001_violations
 
 app = Flask(__name__)
 
@@ -179,6 +181,61 @@ def monthly_kpis():
     except Exception:
         app.logger.exception("Monthly KPI API failed")
         return jsonify({"error": "Unable to load monthly KPI data"}), 500
+    
+@app.route("/api/reconciliation")
+def reconciliation_api():
+    raw_file = (
+        Path(__file__).resolve().parent
+        / "data"
+        / "raw"
+        / "nyc_311_monthly_sample.csv"
+    )
+
+    if not raw_file.exists():
+        return jsonify({
+            "error": "Raw sample data file was not found."
+        }), 404
+
+    try:
+        df = pd.read_csv(raw_file)
+
+        violations = find_mt001_violations(df)
+
+        evidence_columns = [
+            column
+            for column in [
+                "unique_key",
+                "created_date",
+                "agency",
+                "status",
+                "closed_date",
+            ]
+            if column in violations.columns
+        ]
+
+        records = violations[evidence_columns].copy()
+        records = records.astype(object).where(
+            pd.notna(records), None
+        )
+
+        return jsonify({
+            "rule_id": "MT-001",
+            "rule_description": (
+                "Records marked closed with a missing or invalid "
+                "closed date."
+            ),
+            "source": "nyc_311_monthly_sample.csv",
+            "sample_records_checked": int(len(df)),
+            "violation_count": int(len(violations)),
+            "violations": records.to_dict(orient="records"),
+        })
+
+    except Exception:
+        app.logger.exception("Reconciliation API failed")
+        return jsonify({
+            "error": "Unable to calculate reconciliation results."
+        }), 500
+
 
 
 if __name__ == "__main__":

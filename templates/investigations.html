@@ -61,13 +61,15 @@
             <article class="kpi-card">
                 <p>Missing closure dates</p>
                 <h2 id="missingCount">—</h2>
-                <span>Across monthly sample records</span>
-            </article>
-            <article class="kpi-card">
-                <p>Reconciliation rules</p>
-                <h2>Pending</h2>
-                <span>Registry integration required</span>
-            </article>
+               <span>Across monthly sample records</span>
+</article>
+
+<article class="kpi-card">
+    <p>MT-001 reconciliation</p>
+    <h2 id="reconciliationCount">Loading...</h2>
+    <span id="reconciliationStatus">Checking source records</span>
+</article>
+
             <article class="kpi-card">
                 <p>Case status</p>
                 <h2>Not assessed</h2>
@@ -253,6 +255,39 @@ document.getElementById("issueFilter").addEventListener("change", renderInvestig
 document.getElementById("refreshInvestigations").addEventListener("click", loadInvestigations);
 
 loadInvestigations();
+
+async function loadReconciliation() {
+    const countElement = document.getElementById("reconciliationCount");
+    const statusElement = document.getElementById("reconciliationStatus");
+
+    countElement.textContent = "Loading...";
+    statusElement.textContent = "Checking source records";
+
+    try {
+        const response = await fetch("/api/reconciliation");
+
+        if (!response.ok) {
+            throw new Error("API returned " + response.status);
+        }
+
+        const result = await response.json();
+
+        countElement.textContent =
+            Number(result.violation_count).toLocaleString("en-US");
+
+        statusElement.textContent =
+            Number(result.violation_count) === 0
+                ? "No MT-001 violations found in the sample"
+                : "Records require reconciliation review";
+
+    } catch (error) {
+        console.error("Reconciliation API error:", error);
+        countElement.textContent = "Unavailable";
+        statusElement.textContent =
+            "Could not load reconciliation results";
+    }
+}
+loadReconciliation();
 </script>
 </body>
 </html>

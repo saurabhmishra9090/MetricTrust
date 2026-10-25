@@ -213,11 +213,24 @@ body {
     font-size: 13px;
 }
 
+
 .kpi-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: stretch;
     gap: 16px;
     margin-bottom: 22px;
+}
+
+
+.kpi-card,
+.panel {
+    min-width: 0;
+    padding: 21px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
 }
 
 .kpi-card,
@@ -229,6 +242,16 @@ body {
     border-radius: var(--radius);
     box-shadow: var(--shadow);
 }
+
+/* NAYA CODE — yahan paste karo */
+.kpi-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 150px;
+    height: 100%;
+    box-sizing: border-box;
+}
+
 
 .kpi-heading {
     color: var(--muted);
@@ -603,6 +626,11 @@ p, label, select, button {
     width: 100%;
     min-width: 0;
     padding: 12px 0;
+}
+#monthlyColumnChart {
+    display: block;
+    width: 100% !important;
+    height: 320px !important;
 }
 
 .chart-canvas-wrap {

@@ -103,6 +103,23 @@
                 <div class="chart-container">
                     <canvas id="trendChart"></canvas>
                 </div>
+                
+<div class="panel-header">
+    <div>
+        <p class="eyebrow">VOLUME ANALYSIS</p>
+        <h2>Monthly Requests Comparison</h2>
+    </div>
+    <span class="mini-tag">Clustered Column Chart</span>
+</div>
+
+<p class="chart-description">
+    Compare total requests with closed requests for each month.
+</p>
+
+<div class="chart-container">
+    <canvas id="monthlyColumnChart"></canvas>
+</div>
+
 
                 <p class="footnote">
                     Sample-based metrics are not citywide request totals.
@@ -269,6 +286,94 @@
         document.getElementById("trendMetric").addEventListener(
             "change", renderTrendChart
         );
+        async function loadMonthlyColumnData() {
+    const status = document.getElementById("trendStatus");
+    const canvas = document.getElementById("monthlyColumnChart");
+
+    if (!canvas) {
+        console.error("Monthly column chart canvas not found.");
+        return;
+    }
+
+    try {
+        const response = await fetch("/api/monthly-kpis");
+
+        if (!response.ok) {
+            throw new Error(`API returned ${response.status}`);
+        }
+
+        const rows = await response.json();
+
+        if (!Array.isArray(rows) || rows.length === 0) {
+            throw new Error("No monthly KPI data available.");
+        }
+
+        if (window.monthlyColumnChart instanceof Chart) {
+            window.monthlyColumnChart.destroy();
+        }
+
+        window.monthlyColumnChart = new Chart(canvas, {
+            type: "bar",
+            data: {
+                labels: rows.map(row => row.month),
+                datasets: [
+                    {
+                        label: "Total requests",
+                        data: rows.map(row => Number(row.total_requests) || 0),
+                        backgroundColor: "#B8DBD9",
+                        borderColor: "#586F7C",
+                        borderWidth: 1
+                    },
+                    {
+                        label: "Closed requests",
+                        data: rows.map(row => Number(row.closed_requests) || 0),
+                        backgroundColor: "#586F7C",
+                        borderColor: "#40545F",
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: "top"
+                    },
+                    tooltip: {
+                        enabled: true
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            maxTicksLimit: 12,
+                            maxRotation: 45
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: "Number of requests"
+                        }
+                    }
+                }
+            }
+        });
+
+        console.log("Monthly column chart rendered successfully.");
+    } catch (error) {
+        console.error("Monthly column chart error:", error);
+
+        if (status) {
+            status.textContent = `Column chart error: ${error.message}`;
+        }
+    }
+}
+
+loadMonthlyColumnData();
 
         loadTrendData();
     </script>

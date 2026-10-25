@@ -27,8 +27,9 @@ async function loadMonthlyKpis() {
             throw new Error("No monthly KPI records are available.");
         }
 
-        monthlyKpiData = data;
+       monthlyKpiData = data;
         renderMonthlyChart();
+        renderMonthlyColumnChart();
 
         status.textContent = `${data.length} monthly records loaded from MetricTrust database.`;
     } catch (error) {
@@ -96,6 +97,95 @@ function renderMonthlyChart() {
         }
     });
 }
+
+let monthlyColumnChart = null;
+
+function renderMonthlyColumnChart() {
+    const canvas = document.getElementById("monthlyColumnChart");
+     console.log("CLUSTERED CHART FUNCTION STARTED");
+    console.log("Column chart function called");
+    console.log("Canvas:", canvas);
+    console.log("Monthly KPI data:", monthlyKpiData?.length);
+    console.log("Canvas found:", !!canvas);
+console.log("Monthly data length:", monthlyKpiData?.length);
+
+    if (!canvas || !monthlyKpiData || monthlyKpiData.length === 0) {
+        return;
+    }
+
+    const labels = monthlyKpiData.map(row => row.month);
+
+    if (monthlyColumnChart) {
+        monthlyColumnChart.destroy();
+    }
+    console.log("Column chart data:", monthlyKpiData);
+    console.log("Total requests:", monthlyKpiData.map(row => row.total_requests));
+    console.log("Closed requests:", monthlyKpiData.map(row => row.closed_requests));
+
+    monthlyColumnChart = new Chart(canvas, {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "Total requests",
+                    data: monthlyKpiData.map(row =>
+                        Number(row.total_requests) || 0
+                    ),
+                    backgroundColor: "#B8DBD9",
+                    borderColor: "#586F7C",
+                    borderWidth: 1,
+                    borderRadius: 4
+                },
+                {
+                    label: "Closed requests",
+                    data: monthlyKpiData.map(row =>
+                        Number(row.closed_requests) || 0
+                    ),
+                    backgroundColor: "#586F7C",
+                    borderColor: "#40545F",
+                    borderWidth: 1,
+                    borderRadius: 4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: "index",
+                intersect: false
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: "top"
+                },
+                tooltip: {
+                    enabled: true
+                }
+            },
+            scales: {
+                x: {
+                    stacked: false,
+                    ticks: {
+                        maxTicksLimit: 12,
+                        maxRotation: 45,
+                        minRotation: 0
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: "Number of requests"
+                    }
+                }
+            }
+        }
+    });
+}
+
 
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("chartMetric")
