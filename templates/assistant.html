@@ -1,0 +1,510 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MetricTrust AI Assistant</title>
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 28px;
+            background: #f2f3f7;
+            color: #17212b;
+            font-family: Arial, sans-serif;
+        }
+
+        .assistant-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .panel {
+            background: white;
+            border: 1px solid #dce2e8;
+            border-radius: 16px;
+            padding: 26px;
+            margin-bottom: 20px;
+        }
+
+        .eyebrow {
+            color: #586f7c;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        h1 { font-size: 30px; margin: 12px 0; }
+        h2 { font-size: 19px; }
+
+        .muted {
+            color: #667580;
+            line-height: 1.7;
+        }
+
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        button {
+            cursor: pointer;
+            border: 1px solid #dce2e8;
+            border-radius: 9px;
+            padding: 12px 16px;
+            background: #e4f0ef;
+            color: #17212b;
+        }
+
+        button:hover { background: #b8dbd9; }
+
+        .chat-box {
+            min-height: 240px;
+            max-height: 460px;
+            overflow-y: auto;
+            padding: 16px;
+            background: #f8fafb;
+            border: 1px solid #e0e6ea;
+            border-radius: 12px;
+            margin: 18px 0;
+        }
+
+        .message {
+            padding: 14px;
+            margin-bottom: 12px;
+            border-radius: 10px;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
+        }
+
+        .user-message {
+            background: #e4f0ef;
+            margin-left: 30px;
+        }
+
+        .assistant-message {
+            background: white;
+            border: 1px solid #e0e6ea;
+            margin-right: 30px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            min-width: 0;
+            flex: 1;
+            padding: 14px;
+            border: 1px solid #cbd5dc;
+            border-radius: 9px;
+            font-size: 15px;
+        }
+
+        .send-button {
+            background: #586f7c;
+            color: white;
+            border: none;
+        }
+
+        .send-button:hover { background: #40545f; }
+
+        button:disabled { opacity: 0.6; cursor: wait; }
+
+        @media (max-width: 600px) {
+            body { padding: 12px; }
+            .panel { padding: 18px; }
+            h1 { font-size: 25px; }
+            .input-row { flex-direction: column; }
+            .user-message, .assistant-message { margin-left: 0; margin-right: 0; }
+        }
+        
+/* Sidebar navigation */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+  width: 223px;
+    padding: 24px 12px;
+    background: #000000;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    overflow-y: auto;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 4px 30px;
+}
+
+.brand-mark {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: #B8DBD9;
+    color: #000000;
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.brand h2 {
+    margin: 0 0 5px;
+    font-size: 16px;
+    color: #ffffff;
+}
+
+.brand p {
+    margin: 0;
+    font-size: 10px;
+    color: #B8DBD9;
+}
+
+.nav-label {
+    margin: 10px 8px 18px;
+    color: #9BA8AE;
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.navigation {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.navigation .nav-link {
+    display: block;
+    padding: 12px 10px;
+    border-radius: 10px;
+    color: #D4DDE1;
+    text-decoration: none;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.navigation .nav-link:hover,
+.navigation .nav-link.active {
+    background: #B8DBD9;
+    color: #000000;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    border-top: 1px solid #30383D;
+    padding: 18px 4px 0;
+    color: #B8C4C9;
+    font-size: 9px;
+}
+
+.status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #B8DBD9;
+    margin-right: 6px;
+}
+
+/* Keep assistant content beside the sidebar */
+.assistant-container {
+    width: auto;
+    max-width: none;
+  margin: 0 0 0 223px;
+    padding: 20px;
+}
+
+@media (max-width: 700px) {
+    .sidebar {
+        position: relative;
+        width: 100%;
+        min-height: auto;
+    }
+
+    .sidebar-footer {
+        margin-top: 20px;
+    }
+
+    .assistant-container {
+        margin-left: 0;
+        padding: 14px;
+    }
+}
+
+/* MetricTrust AI Assistant hero */
+.assistant-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(240px, 0.85fr);
+    align-items: center;
+    gap: 24px;
+    overflow: hidden;
+    background:
+        radial-gradient(ellipse at 78% 50%, rgba(0, 207, 200, 0.14), transparent 52%),
+        #ffffff;
+}
+
+.assistant-hero-copy {
+    position: relative;
+    z-index: 1;
+}
+
+.assistant-hero-copy h1 span {
+    color: #009FA5;
+}
+
+.assistant-robot {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 0;
+   animation: robot-float 3s ease-in-out infinite !important;
+}
+
+.assistant-robot img {
+    display: block;
+    width: 100%;
+    max-width: 340px;
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 10px 24px rgba(0, 190, 200, 0.24));
+   animation: robot-glow 3s ease-in-out infinite alternate !important;
+}
+
+@keyframes robot-float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes robot-glow {
+    from {
+        filter: drop-shadow(0 8px 18px rgba(0, 190, 200, 0.18));
+    }
+    to {
+        filter: drop-shadow(0 12px 28px rgba(0, 210, 210, 0.42));
+    }
+}
+
+@media (max-width: 700px) {
+    .assistant-hero {
+        grid-template-columns: 1fr;
+    }
+
+    .assistant-robot img {
+        max-width: 260px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .assistant-robot,
+    .assistant-robot img {
+        animation: none;
+    }
+}
+
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="brand">
+           
+<div class="brand-mark">
+    <img
+        src="{{ url_for('static', filename='images/metrictrust-mark.png') }}"
+        alt="MetricTrust logo"
+    >
+</div>
+
+            <div>
+                <h2>MetricTrust</h2>
+                <p>Analytics Integrity</p>
+            </div>
+        </div>
+
+        <p class="nav-label">WORKSPACE</p>
+
+        <nav class="navigation">
+            <a class="nav-link" href="/">Analytics Overview</a>
+            <a class="nav-link" href="/trends">KPI Trends &amp; Analysis</a>
+            <a class="nav-link" href="/investigations">Investigations &amp; Reconciliation</a>
+            <a class="nav-link" href="/definitions">Definition History</a>
+            <a class="nav-link" href="/quality">Data Quality &amp; Reports</a>
+            <a class="nav-link active" href="/assistant">MetricTrust AI Assistant</a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <span class="status-dot"></span>
+            Local analytics environment
+        </div>
+    </aside>
+
+    <main class="assistant-container">
+
+
+<section class="panel assistant-hero">
+    <div class="assistant-hero-copy">
+        <p class="eyebrow">METRICTRUST / INTELLIGENCE</p>
+
+        <h1>MetricTrust <span>AI Assistant</span></h1>
+
+        <p class="muted">
+            Explore KPI trends, data quality signals and metric definitions.
+            Responses depend on the data and analysis available to the application.
+        </p>
+
+        <button type="button" onclick="location.href='/'">
+            ← Back to Analytics Overview
+        </button>
+    </div>
+
+    <div class="assistant-robot">
+        <img
+            src="{{ url_for('static', filename='images/metrictrust-robot.png') }}"
+            alt="MetricTrust friendly 3D AI robot"
+        >
+    </div>
+</section>
+
+
+        <section class="panel">
+            <p class="eyebrow">ANALYST WORKSPACE</p>
+            <h2>Ask a question about your metrics</h2>
+            <p class="muted">
+                Start with one of these questions:
+            </p>
+
+            <div class="suggestions">
+                <button type="button" onclick="useSuggestion('What is the overall closure rate?')">
+                    Overall closure rate
+                </button>
+                <button type="button" onclick="useSuggestion('Which months have missing closure dates?')">
+                    Missing closure dates
+                </button>
+                <button type="button" onclick="useSuggestion('How should I investigate a KPI change?')">
+                    Investigate KPI changes
+                </button>
+            </div>
+
+            <div id="chatBox" class="chat-box" aria-live="polite">
+                <div class="message assistant-message">
+                    Hello! I’m the MetricTrust analysis interface. Choose a suggested
+                    question or type your own question below. Backend connectivity
+                    will be verified before enabling data-driven answers.
+                </div>
+            </div>
+
+            <form id="questionForm" class="input-row">
+                <input
+                    id="questionInput"
+                    type="text"
+                    placeholder="Ask about KPIs or data quality..."
+                    autocomplete="off"
+                    required
+                >
+                <button id="sendButton" class="send-button" type="submit">
+                    Send
+                </button>
+            </form>
+
+            <p id="assistantStatus" class="muted" role="status">
+                Interface ready. Backend connection not yet verified.
+            </p>
+        </section>
+    </main>
+
+    <script>
+        const form = document.getElementById("questionForm");
+        const input = document.getElementById("questionInput");
+        const chatBox = document.getElementById("chatBox");
+        const statusText = document.getElementById("assistantStatus");
+        const sendButton = document.getElementById("sendButton");
+
+        function addMessage(text, type) {
+            const message = document.createElement("div");
+            message.className = "message " + type;
+            message.textContent = text;
+            chatBox.appendChild(message);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            return message;
+        }
+
+        function useSuggestion(question) {
+            input.value = question;
+            input.focus();
+        }
+
+        form.addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const question = input.value.trim();
+            if (!question) return;
+
+            addMessage(question, "user-message");
+            input.value = "";
+            sendButton.disabled = true;
+            statusText.textContent = "Checking assistant backend...";
+
+            try {
+                const response = await fetch("/api/assistant", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ question })
+                });
+
+                const result = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    throw new Error(
+                        result.error || "Assistant API returned HTTP " + response.status
+                    );
+                }
+
+                const answer = result.answer || result.response || result.message;
+
+                if (!answer) {
+                    throw new Error(
+                        "API responded, but no answer field was returned."
+                    );
+                }
+
+                addMessage(String(answer), "assistant-message");
+                statusText.textContent = "Response received from the backend.";
+
+            } catch (error) {
+                addMessage(
+                    "I couldn't get an answer from the backend. " +
+                    "The assistant API may not exist yet or may have returned an error. " +
+                    "Please check the Flask terminal and browser console.",
+                    "assistant-message"
+                );
+
+                statusText.textContent = error.message;
+                console.error("MetricTrust assistant error:", error);
+
+            } finally {
+                sendButton.disabled = false;
+                input.focus();
+            }
+        });
+    </script>
+</body>
+</html>

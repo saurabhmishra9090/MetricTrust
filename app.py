@@ -1,5 +1,4 @@
-
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 from pathlib import Path
 import duckdb
 import pandas as pd
@@ -235,6 +234,74 @@ def reconciliation_api():
         return jsonify({
             "error": "Unable to calculate reconciliation results."
         }), 500
+
+@app.route("/api/assistant", methods=["POST"])
+def assistant_api():
+    try:
+        payload = request.get_json(silent=True) or {}
+        question = str(payload.get("question", "")).strip().lower()
+
+        if not question:
+            return jsonify({"error": "Please enter a question."}), 400
+
+        monthly = fetch_dashboard_data()
+
+        if monthly is None or monthly.empty:
+            return jsonify({
+                "error": "No monthly KPI data is available."
+            }), 503
+
+        total_requests = int(monthly["total_requests"].sum())
+        closed_requests = int(monthly["closed_requests"].sum())
+        missing_dates = int(monthly["missing_closed_dates"].sum())
+
+        closure_rate = (
+            round(closed_requests / total_requests * 100, 2)
+            if total_requests else 0
+        )
+
+        if "closure" in question and ("rate" in question or "overall" in question):
+            answer = (
+                f"The aggregate closure rate across the available monthly sample "
+                f"is {closure_rate}%. There are {total_requests:,} requests and "
+                f"{closed_requests:,} closed requests in the monthly aggregates. "
+                "These are sample-based figures, not citywide totals."
+            )
+
+        elif "missing" in question and ("date" in question or "closure" in question):
+            answer = (
+                f"The monthly aggregates report {missing_dates} missing closure "
+                f"dates across {len(monthly)} months. This is a sum of monthly "
+                "counts; it does not by itself prove that every record is a "
+                "data-quality violation. Review transaction-level evidence "
+                "before concluding that a closed record is missing its date."
+            )
+
+        elif "investigat" in question or "kpi change" in question or "definition" in question:
+            answer = (
+                "To investigate a KPI change: 1) compare the affected months, "
+                "2) check data-quality signals and missing dates, "
+                "3) review the metric definition history, and "
+                "4) reconcile against transaction-level records. "
+                "A signal identifies something to investigate; it does not "
+                "establish the root cause."
+            )
+
+        else:
+            answer = (
+                "I can currently answer questions about overall closure rate, "
+                "missing closure dates, and how to investigate KPI changes. "
+                "Try one of those topics."
+            )
+
+        return jsonify({"answer": answer})
+
+    except Exception:
+        app.logger.exception("MetricTrust assistant API failed")
+        return jsonify({
+            "error": "Unable to analyze KPI data. Check the Flask terminal."
+        }), 500
+
 
 
 

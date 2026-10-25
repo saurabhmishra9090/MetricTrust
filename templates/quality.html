@@ -1,0 +1,384 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Quality & Reports | MetricTrust</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 28px;
+            background: #f2f3f7;
+            color: #17212b;
+            font-family: Arial, sans-serif;
+        }
+      .container {
+    width: calc(100% - 248px);
+    max-width: 1400px;
+    margin-left: 248px;
+    padding: 24px;
+}
+        .topbar, .panel, .kpi {
+            background: white;
+            border: 1px solid #dce2e8;
+            border-radius: 14px;
+            padding: 22px;
+            margin-bottom: 20px;
+        }
+        .eyebrow {
+            color: #586f7c;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        h1 { margin: 10px 0; font-size: 28px; }
+        h2 { font-size: 18px; }
+        .muted { color: #667580; line-height: 1.6; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+        }
+        .kpi h3 { font-size: 13px; color: #586f7c; }
+        .value { font-size: 30px; font-weight: bold; margin: 14px 0; }
+        .button {
+            display: inline-block;
+            padding: 11px 15px;
+            background: #586f7c;
+            color: white;
+            border: 0;
+            border-radius: 8px;
+            text-decoration: none;
+            cursor: pointer;
+            margin: 5px 5px 5px 0;
+        }
+        .button.secondary { background: #e4efee; color: #243943; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+        th, td {
+            padding: 13px;
+            border-bottom: 1px solid #e7ebef;
+            text-align: left;
+            font-size: 13px;
+        }
+        th { background: #f6f8fa; }
+        .status {
+            display: inline-block;
+            padding: 5px 8px;
+            border-radius: 20px;
+            background: #e4efee;
+            color: #28564f;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .warning { background: #fff0d6; color: #875a0a; }
+        .error { color: #a33b3b; }
+        .chart-area { height: 280px; }
+        @media (max-width: 750px) {
+            body { padding: 14px; }
+            .grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 800px) {
+    .container {
+    width: calc(100% - 248px);
+    max-width: none;
+    margin-left: 248px;
+    padding: 24px 18px;
+}
+}
+    </style>
+</head>
+<body>
+<div class="container">
+    
+<aside class="sidebar">
+    <div class="brand">
+       <div class="brand-mark">
+    <img
+        src="{{ url_for('static', filename='images/metrictrust-mark.png') }}"
+        alt="MetricTrust logo"
+    >
+</div>
+        <div>
+            <h2>MetricTrust</h2>
+            <p>Analytics Integrity</p>
+        </div>
+    </div>
+
+    <p class="nav-label">WORKSPACE</p>
+
+    <nav class="navigation">
+        <a class="nav-link" href="/">Analytics Overview</a>
+        <a class="nav-link" href="/trends">KPI Trends & Analysis</a>
+        <a class="nav-link" href="/investigations">Investigations & Reconciliation</a>
+        <a class="nav-link" href="/definitions">Definition History</a>
+        <a class="nav-link active" href="/quality">Data Quality & Reports</a>
+        <a class="nav-link" href="/assistant">MetricTrust AI Assistant</a>
+    </nav>
+
+    <div class="sidebar-footer">
+        <span class="status-dot"></span>
+        Local analytics environment
+    </div>
+</aside>
+
+    <header class="topbar">
+        <div class="eyebrow">METRICTRUST / DATA GOVERNANCE</div>
+        <h1>Data Quality & Reports</h1>
+        <p class="muted">
+            Inspect monthly KPI data, review missing closure dates and export
+            a transparent quality summary.
+        </p>
+        <a href="/" class="button secondary">← Back to Analytics Overview</a>
+        <button id="refreshBtn" class="button">Refresh analysis</button>
+        <button id="exportBtn" class="button secondary">Export CSV report</button>
+        <p id="qualityStatus" class="muted" role="status">Loading quality analysis…</p>
+    </header>
+
+    <section class="grid">
+        <article class="kpi">
+            <h3>MONTHLY RECORDS</h3>
+            <div class="value" id="recordCount">—</div>
+            <p class="muted">Monthly aggregates returned by the API</p>
+        </article>
+        <article class="kpi">
+            <h3>MISSING CLOSURE DATES</h3>
+            <div class="value" id="missingCount">—</div>
+            <p class="muted">Sum of monthly missing-date counts</p>
+        </article>
+        <article class="kpi">
+            <h3>MT-001 RECONCILIATION</h3>
+            <div class="value" id="violationCount">—</div>
+            <p class="muted">Closed-status records with missing dates cannot be verified from monthly aggregates alone.</p>
+        </article>
+    </section>
+
+    <section class="panel">
+        <div class="eyebrow">QUALITY DISTRIBUTION</div>
+        <h2>Monthly missing closure dates</h2>
+        <p class="muted">
+            Shows missing-date counts reported by the monthly KPI API.
+        </p>
+        <div class="chart-area">
+            <canvas id="qualityChart"></canvas>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="eyebrow">MONTHLY VALIDATION</div>
+        <h2>Quality review table</h2>
+        <p class="muted">
+            These are monthly aggregate checks, not transaction-level proof
+            of individual data errors.
+        </p>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Total requests</th>
+                        <th>Closed requests</th>
+                        <th>Missing closure dates</th>
+                        <th>Closure rate</th>
+                        <th>Review</th>
+                    </tr>
+                </thead>
+                <tbody id="qualityRows">
+                    <tr><td colspan="6">Loading…</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <p class="muted">
+        MetricTrust uses a capped sample dataset. Missing closure dates do not
+        automatically mean a closed request is invalid. Investigate the
+        underlying records before attributing a cause.
+    </p>
+</div>
+
+<script>
+    let qualityData = [];
+    let qualityChartInstance = null;
+
+    const numberFormat = new Intl.NumberFormat("en-US");
+
+    async function loadQualityData() {
+        const status = document.getElementById("qualityStatus");
+        const tbody = document.getElementById("qualityRows");
+
+        status.textContent = "Loading quality analysis…";
+
+        try {
+            const response = await fetch("/api/monthly-kpis", {
+                cache: "no-store"
+            });
+
+            if (!response.ok) {
+                throw new Error(`API returned HTTP ${response.status}`);
+            }
+
+            const rows = await response.json();
+
+            if (!Array.isArray(rows) || rows.length === 0) {
+                throw new Error("No monthly KPI records were returned.");
+            }
+
+            qualityData = rows;
+
+            const missingTotal = rows.reduce(
+                (sum, row) => sum + (Number(row.missing_closed_dates) || 0), 0
+            );
+
+            document.getElementById("recordCount").textContent =
+                numberFormat.format(rows.length);
+
+            document.getElementById("missingCount").textContent =
+                numberFormat.format(missingTotal);
+
+            // Monthly aggregates cannot establish MT-001 transaction-level
+            // violations, so do not invent a violation count here.
+            document.getElementById("violationCount").textContent = "N/A";
+
+            tbody.innerHTML = rows.map(row => {
+                const missing = Number(row.missing_closed_dates) || 0;
+                const total = Number(row.total_requests) || 0;
+                const closed = Number(row.closed_requests) || 0;
+                const rate = Number(row.closure_rate_pct);
+
+                const review = missing > 0
+                    ? '<span class="status warning">Review dates</span>'
+                    : '<span class="status">No missing dates</span>';
+
+                return `
+                    <tr>
+                        <td>${escapeHtml(row.month ?? "Unknown")}</td>
+                        <td>${numberFormat.format(total)}</td>
+                        <td>${numberFormat.format(closed)}</td>
+                        <td>${numberFormat.format(missing)}</td>
+                        <td>${Number.isFinite(rate) ? rate.toFixed(2) + "%" : "N/A"}</td>
+                        <td>${review}</td>
+                    </tr>
+                `;
+            }).join("");
+
+            renderQualityChart(rows);
+            status.textContent =
+                `Loaded ${rows.length} monthly records successfully.`;
+
+        } catch (error) {
+            console.error("Data quality page error:", error);
+            status.textContent = `Unable to load data: ${error.message}`;
+            tbody.innerHTML =
+                '<tr><td colspan="6">Data could not be loaded. Check the Flask terminal and API response.</td></tr>';
+        }
+    }
+
+    function renderQualityChart(rows) {
+        const canvas = document.getElementById("qualityChart");
+
+        if (qualityChartInstance) {
+            qualityChartInstance.destroy();
+        }
+
+        qualityChartInstance = new Chart(canvas, {
+            type: "bar",
+            data: {
+                labels: rows.map(row => row.month),
+                datasets: [{
+                    label: "Missing closure dates",
+                    data: rows.map(row =>
+                        Number(row.missing_closed_dates) || 0
+                    ),
+                    backgroundColor: "#B8DBD9",
+                    borderColor: "#586F7C",
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: true },
+                    tooltip: { enabled: true }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            maxTicksLimit: 12,
+                            maxRotation: 45
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: "Missing dates"
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, char => ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;"
+        })[char]);
+    }
+
+    function exportQualityCsv() {
+        if (!qualityData.length) {
+            alert("No quality data is available to export.");
+            return;
+        }
+
+        const headers = [
+            "month",
+            "total_requests",
+            "closed_requests",
+            "missing_closed_dates",
+            "closure_rate_pct"
+        ];
+
+        const csv = [
+            headers.join(","),
+            ...qualityData.map(row =>
+                headers.map(key => {
+                    const value = row[key] ?? "";
+                    return `"${String(value).replace(/"/g, '""')}"`;
+                }).join(",")
+            )
+        ].join("\r\n");
+
+        const blob = new Blob(["\uFEFF" + csv], {
+            type: "text/csv;charset=utf-8;"
+        });
+
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "metrictrust_quality_report.csv";
+        link.click();
+        URL.revokeObjectURL(url);
+    }
+
+    document.getElementById("refreshBtn")
+        .addEventListener("click", loadQualityData);
+
+    document.getElementById("exportBtn")
+        .addEventListener("click", exportQualityCsv);
+
+    loadQualityData();
+</script>
+</body>
+</html>

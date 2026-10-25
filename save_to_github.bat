@@ -59,3 +59,4 @@ if errorlevel 1 (
 echo.
 echo SUCCESS: MetricTrust saved to GitHub!
 pause
+ 

@@ -10,16 +10,23 @@
 </head>
 <body>
 <div class="app-layout">
-    <aside class="sidebar">
-        <div class="brand">
-            <div class="brand-mark">M</div>
+    <aside class="sidebar">         
+<div class="brand">
+    <div class="brand-mark">
+        <img
+            src="{{ url_for('static', filename='images/metrictrust-mark.png') }}"
+            alt="MetricTrust logo"
+        >
+    </div>
+    <div>
+        <h2>MetricTrust</h2>
+        <p>Analytics Integrity</p>
+    </div>
+</div>
+
             <div>
                 <h2>MetricTrust</h2>
-                <p>Analytics Integrity</p>
-            </div>
-        </div>
-
-        <p class="nav-label">WORKSPACE</p>
+                
         <nav class="navigation">
             <a class="nav-link" href="/">Analytics Overview</a>
             <a class="nav-link" href="/trends">KPI Trends & Analysis</a>

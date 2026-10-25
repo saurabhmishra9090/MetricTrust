@@ -62,15 +62,22 @@ body {
 .brand-mark {
     width: 42px;
     height: 42px;
-    display: grid;
-    place-items: center;
-    background: var(--color-light-aqua);
-    color: var(--color-black);
+    min-width: 42px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
     border-radius: 12px;
-    font-size: 22px;
-    font-weight: 800;
+    background: transparent;
 }
 
+.brand-mark img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
 .brand h2 {
     margin: 0;
     font-size: 19px;
@@ -731,3 +738,394 @@ main,
         grid-template-columns: minmax(0, 1fr) !important;
     }
 }
+
+body {
+    padding: 0;
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 248px;
+    background: #000000;
+    color: #ffffff;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 8px 30px;
+}
+
+.brand h2 {
+    margin: 0 0 5px;
+    font-size: 17px;
+    color: white;
+}
+
+.brand p {
+    margin: 0;
+    font-size: 10px;
+    color: #B8DBD9;
+}
+
+.nav-label {
+    margin: 10px 12px 18px;
+    color: #9BA8AE;
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.navigation {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.navigation .nav-link {
+    display: block;
+    padding: 13px 12px;
+    border-radius: 10px;
+    color: #D4DDE1;
+    text-decoration: none;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.navigation .nav-link:hover,
+.navigation .nav-link.active {
+    background: #B8DBD9;
+    color: #000000;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    border-top: 1px solid #30383D;
+    padding: 18px 6px 0;
+    color: #B8C4C9;
+    font-size: 10px;
+}
+
+.status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #B8DBD9;
+    margin-right: 8px;
+}
+
+.container {
+    max-width: none;
+    margin: 0 0 0 248px;
+    padding: 24px;
+}
+
+@media (max-width: 800px) {
+    .sidebar {
+        position: relative;
+        width: 100%;
+        min-height: auto;
+    }
+
+    .sidebar-footer {
+        margin-top: 20px;
+    }
+
+    .container {
+        margin-left: 0;
+        padding: 14px;
+    }
+}
+/* MetricTrust Dashboard Banner */
+.metrictrust-banner {
+    width: 100%;
+    margin: 0 0 24px;
+    overflow: hidden;
+    border-radius: 12px;
+    line-height: 0;
+}
+
+.metrictrust-banner img {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    border-radius: 12px;
+}
+/* MetricTrust Compact Banner */
+.metrictrust-banner {
+    width: 100%;
+    height: 155px;
+    margin: 0 0 22px;
+    overflow: hidden;
+    border-radius: 12px;
+    line-height: 0;
+    background: #001719;
+}
+
+.metrictrust-banner img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    border-radius: 12px;
+}
+
+/* MetricTrust split hero — LeakGuard-inspired */
+.overview-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: 24px;
+    align-items: center;
+    margin-bottom: 28px;
+}
+
+
+.overview-hero .metrictrust-banner {
+    width: 100%;
+    height: 220px;
+    margin: 0;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #001719;
+    line-height: 0;
+}
+
+.overview-hero .metrictrust-banner img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 12px;
+}
+
+
+.overview-hero .welcome-row {
+    min-width: 0;
+    margin: 0;
+}
+
+@media (max-width: 900px) {
+    .overview-hero {
+        grid-template-columns: 1fr;
+    }
+
+    .overview-hero .metrictrust-banner {
+        height: auto;
+        aspect-ratio: 2.5 / 1;
+    }
+}
+
+/* MetricTrust Overview Hero */
+.overview-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: 24px;
+    align-items: center;
+    margin-bottom: 28px;
+}
+
+.overview-hero .metrictrust-banner {
+    width: 100%;
+    height: 220px;
+    margin: 0;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #001719;
+    line-height: 0;
+}
+
+.overview-hero .metrictrust-banner img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center;
+}
+
+.overview-insights {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(130px, 0.8fr);
+    align-items: center;
+    gap: 12px;
+}
+
+.overview-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #586F7C;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+}
+
+.overview-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #00CFC8;
+    box-shadow: 0 0 10px #00CFC866;
+}
+
+.overview-copy h2 {
+    margin: 12px 0 8px;
+    font-size: clamp(20px, 1.8vw, 30px);
+    line-height: 1.2;
+}
+
+.overview-copy h2 span {
+    display: block;
+    color: #00AFAF;
+}
+
+.overview-copy p {
+    color: #586F7C;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.metrictrust-insight-visual {
+    width: 100%;
+    max-width: 240px;
+    justify-self: center;
+    animation: metrictrust-float 4s ease-in-out infinite;
+}
+
+.metrictrust-insight-visual img {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+@keyframes metrictrust-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+
+.overview-insights .date-chip {
+    grid-column: 1 / -1;
+    justify-self: end;
+}
+
+@media (max-width: 1000px) {
+    .overview-hero {
+        grid-template-columns: 1fr;
+    }
+
+    .overview-insights {
+        grid-template-columns: minmax(0, 1fr) minmax(120px, 220px);
+    }
+}
+
+@media (max-width: 560px) {
+    .overview-insights {
+        grid-template-columns: 1fr;
+    }
+
+    .metrictrust-insight-visual {
+        max-width: 220px;
+    }
+}
+
+/* MetricTrust premium dark gradient KPI cards */
+.kpi-grid .kpi-card {
+    background: linear-gradient(135deg, #07131D 0%, #0B2029 55%, #10343A 100%);
+    border: 1px solid rgba(0, 207, 200, 0.28);
+    border-radius: 16px;
+    color: #F4FBFF;
+    box-shadow: 0 8px 24px rgba(3, 15, 24, 0.12);
+    transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+    overflow: hidden;
+    position: relative;
+}
+
+/* KPI labels */
+.kpi-grid .kpi-card .kpi-heading,
+.kpi-grid .kpi-card .kpi-heading span {
+    color: #A8C1CC;
+}
+
+/* KPI numbers */
+.kpi-grid .kpi-card h3 {
+    color: #F5FCFF;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+/* Supporting text */
+.kpi-grid .kpi-card p {
+    color: #91AEBB;
+}
+
+/* Existing icon tiles */
+.kpi-grid .kpi-card .kpi-icon {
+    border-radius: 10px;
+}
+
+/* Teal glow on hover */
+.kpi-grid .kpi-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(0, 220, 210, 0.65);
+    box-shadow: 0 12px 30px rgba(0, 190, 200, 0.14);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .kpi-grid .kpi-card {
+        transition: none;
+    }
+
+    .kpi-grid .kpi-card:hover {
+        transform: none;
+    }
+}
+
+/* Highlight KPI icons on dark gradient cards */
+.kpi-grid .kpi-card .kpi-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    min-height: 36px;
+    padding: 8px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #B8FFF3, #36D9D0) !important;
+    color: #06232B !important;
+    font-weight: 800;
+    border: 1px solid rgba(120, 255, 240, 0.65);
+    box-shadow: 0 0 14px rgba(0, 220, 210, 0.18);
+}
+
+/* Make the icon glyph itself visible */
+.kpi-grid .kpi-card .kpi-icon,
+.kpi-grid .kpi-card .kpi-icon * {
+    color: #06232B !important;
+    fill: #06232B;
+    stroke: #06232B;
+}
+
+/* Subtle highlight on card hover */
+.kpi-grid .kpi-card:hover .kpi-icon {
+    box-shadow: 0 0 20px rgba(0, 220, 210, 0.38);
+}
+
+/* Match dashboard section headings with KPI teal */
+.main-content h2,
+.main-content .panel h2,
+.main-content .section-title {
+    color: #62E6DA !important;
+}
+

@@ -15,15 +15,20 @@
     <div class="app-shell">
 
         <aside class="sidebar">
-            <div class="brand">
-                <div class="brand-mark">M</div>
-                <div>
-                    <h2>MetricTrust</h2>
-                    <p>Analytics Integrity</p>
-                </div>
-            </div>
-
-            <p class="nav-label">WORKSPACE</p>
+            
+<div class="brand">
+    <div class="brand-mark">
+        <img
+            src="{{ url_for('static', filename='images/metrictrust-mark.png') }}"
+            alt="MetricTrust logo"
+        >
+    </div>
+    <div>
+        <h2>MetricTrust</h2>
+        <p>Analytics Integrity</p>
+    </div>
+</div>
+     <p class="nav-label">WORKSPACE</p>
             
 <nav class="navigation">
     
@@ -51,14 +56,48 @@
                 </div>
                 <div class="environment-tag">SAMPLE DATA</div>
             </header>
+           
 
-            <section class="welcome-row">
-                <div>
-                    <h2>Know what changed. Understand why.</h2>
-                    <p>Monitor KPI movement, definition changes and data quality signals.</p>
-                </div>
-                <div class="date-chip">NYC 311 · 2023–2025 sample</div>
-            </section>
+<section class="overview-hero">
+    <div class="metrictrust-banner">
+        <img
+            src="{{ url_for('static', filename='images/metrictrust-banner.png') }}"
+            alt="MetricTrust - Analytics Integrity"
+        >
+    </div>
+
+    <div class="overview-insights">
+        <div class="overview-copy">
+            <span class="overview-label">
+                <span class="overview-status-dot"></span>
+                METRIC GOVERNANCE
+            </span>
+
+            <h2>
+                Know what changed.
+                <span>Understand why.</span>
+            </h2>
+
+            <p>
+                Monitor KPI movement, definition changes
+                and data quality signals.
+            </p>
+        </div>
+
+        <div class="metrictrust-insight-visual">
+            <img
+                src="{{ url_for('static', filename='images/metrictrust-insight.png') }}"
+                alt="KPI analysis: definition changes, data quality and real performance"
+            >
+        </div>
+
+        <div class="date-chip">
+            NYC 311 · 2023–2025 sample
+        </div>
+    </div>
+</section>
+
+
 
             <section class="kpi-grid">
                 <article class="kpi-card">
