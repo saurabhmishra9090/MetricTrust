@@ -303,6 +303,86 @@ RETURNING case_id, month, status, analyst_notes,
         con.close()
 
 
+@app.route("/api/investigation-cases/<int:case_id>", methods=["PATCH"])
+def update_investigation_case(case_id):
+    payload = request.get_json(silent=True) or {}
+
+    allowed_fields = {"status", "analyst_notes"}
+    if not payload or not set(payload).issubset(allowed_fields):
+        return jsonify({
+            "error": "Provide status and/or analyst_notes."
+        }), 400
+
+    status = payload.get("status")
+    notes = payload.get("analyst_notes")
+
+    if status is not None and status not in {
+        "Open", "In Progress", "Resolved"
+    }:
+        return jsonify({
+            "error": "Status must be Open, In Progress, or Resolved."
+        }), 400
+
+    if notes is not None and not isinstance(notes, str):
+        return jsonify({
+            "error": "analyst_notes must be text."
+        }), 400
+
+    con = duckdb.connect(str(DB_FILE))
+    try:
+        existing = con.execute(
+            "SELECT case_id FROM investigation_cases WHERE case_id = ?",
+            [case_id]
+        ).fetchone()
+
+        if existing is None:
+            return jsonify({"error": "Investigation case not found."}), 404
+
+        if status is not None and notes is not None:
+            con.execute("""
+                UPDATE investigation_cases
+                SET status = ?, analyst_notes = ?,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE case_id = ?
+            """, [status, notes, case_id])
+
+        elif status is not None:
+            con.execute("""
+                UPDATE investigation_cases
+                SET status = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE case_id = ?
+            """, [status, case_id])
+
+        elif notes is not None:
+            con.execute("""
+                UPDATE investigation_cases
+                SET analyst_notes = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE case_id = ?
+            """, [notes, case_id])
+
+        updated = con.execute("""
+            SELECT case_id, month, status, analyst_notes,
+                   created_at, updated_at
+            FROM investigation_cases
+            WHERE case_id = ?
+        """, [case_id]).fetchone()
+
+        return jsonify({
+            "case_id": updated[0],
+            "month": updated[1],
+            "status": updated[2],
+            "analyst_notes": updated[3],
+            "created_at": str(updated[4]),
+            "updated_at": str(updated[5])
+        })
+
+    except Exception:
+        app.logger.exception("Investigation case update failed")
+        return jsonify({"error": "Unable to update investigation case."}), 500
+
+    finally:
+        con.close()
+
 @app.route("/api/assistant", methods=["POST"])
 def assistant_api():
     try:
