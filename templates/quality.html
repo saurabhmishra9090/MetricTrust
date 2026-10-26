@@ -90,6 +90,94 @@
     padding: 24px 18px;
 }
 }
+
+/* Data Quality & Reports — full header background */
+.topbar {
+    background: linear-gradient(135deg, #071D25 0%, #10383D 100%) !important;
+    color: #F4FAFC !important;
+    border: 1px solid #24565B !important;
+    border-radius: 14px !important;
+    padding: 24px !important;
+    box-shadow: 0 8px 22px rgba(7, 29, 37, 0.12);
+}
+
+.topbar h1,
+.topbar .eyebrow,
+.topbar .muted {
+    color: #F4FAFC !important;
+}
+
+.topbar .button.secondary {
+    background: #D8E8F8 !important;
+    color: #071D25 !important;
+}
+/* KPI icon tiles — larger and clearer */
+.kpi .kpi-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.kpi .kpi-icon {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-size: 25px;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.kpi-records .kpi-icon {
+    color: #278BFF;
+}
+
+.kpi-missing .kpi-icon {
+    color: #FF6B8A;
+}
+
+.kpi-reconciliation .kpi-icon {
+    color: #36D9D0;
+}
+/* KPI cards — dark premium background */
+.grid .kpi {
+    background: linear-gradient(135deg, #0B1D2D 0%, #10383D 100%) !important;
+    border: 1px solid #245465 !important;
+    border-radius: 18px !important;
+    color: #F4FAFC !important;
+    box-shadow: 0 8px 22px rgba(7, 29, 37, 0.12);
+}
+
+/* KPI labels and descriptions */
+.grid .kpi h3,
+.grid .kpi p,
+.grid .kpi .muted {
+    color: #B8C9D8 !important;
+}
+
+/* KPI values */
+.grid .kpi .value {
+    color: #F4FAFC !important;
+}
+
+/* Keep the existing icon colors */
+.grid .kpi-records .kpi-icon {
+    color: #278BFF !important;
+}
+
+.grid .kpi-missing .kpi-icon {
+    color: #FF6B8A !important;
+}
+
+.grid .kpi-reconciliation .kpi-icon {
+    color: #36D9D0 !important;
+}
+
     </style>
 </head>
 <body>
@@ -140,21 +228,40 @@
     </header>
 
     <section class="grid">
-        <article class="kpi">
-            <h3>MONTHLY RECORDS</h3>
-            <div class="value" id="recordCount">—</div>
-            <p class="muted">Monthly aggregates returned by the API</p>
-        </article>
-        <article class="kpi">
-            <h3>MISSING CLOSURE DATES</h3>
-            <div class="value" id="missingCount">—</div>
-            <p class="muted">Sum of monthly missing-date counts</p>
-        </article>
-        <article class="kpi">
-            <h3>MT-001 RECONCILIATION</h3>
-            <div class="value" id="violationCount">—</div>
-            <p class="muted">Closed-status records with missing dates cannot be verified from monthly aggregates alone.</p>
-        </article>
+        
+<article class="kpi kpi-records">
+    <div class="kpi-top">
+        <h3>MONTHLY RECORDS</h3>
+        <span class="kpi-icon">▤</span>
+    </div>
+    <div class="value" id="recordCount">—</div>
+    <p class="muted">Monthly aggregates returned by the API</p>
+    <div class="kpi-mini-chart" id="recordsMiniChart" aria-label="Monthly records trend"></div>
+    <div class="kpi-trend-line"></div>
+</article>
+
+<article class="kpi kpi-missing">
+    <div class="kpi-top">
+        <h3>MISSING CLOSURE DATES</h3>
+        <span class="kpi-icon">⌕</span>
+    </div>
+    <div class="value" id="missingCount">—</div>
+    <p class="muted">Sum of monthly missing-date counts</p>
+    <div class="kpi-mini-chart" id="missingMiniChart" aria-label="Missing dates trend"></div>
+    <div class="kpi-trend-line"></div>
+</article>
+
+<article class="kpi kpi-reconciliation">
+    <div class="kpi-top">
+        <h3>MT-001 RECONCILIATION</h3>
+        <span class="kpi-icon">◇</span>
+    </div>
+    <div class="value" id="violationCount">—</div>
+    <p class="muted">Closed-status records with missing dates cannot be verified from monthly aggregates alone.</p>
+    <div class="kpi-mini-chart" id="reconciliationMiniChart" aria-label="Reconciliation trend"></div>
+    <div class="kpi-trend-line"></div>
+</article>
+
     </section>
 
     <section class="panel">
@@ -300,7 +407,22 @@
                     borderRadius: 4
                 }]
             },
+        
+plugins: [{
+    id: "lavenderBackground",
+    beforeDraw(chart) {
+        const { ctx, width, height } = chart;
+
+        ctx.save();
+        ctx.globalCompositeOperation = "destination-over";
+        ctx.fillStyle = "#E8E5F7";
+        ctx.fillRect(0, 0, width, height);
+        ctx.restore();
+    }
+}],
+
             options: {
+            
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {

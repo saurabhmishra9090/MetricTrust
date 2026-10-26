@@ -1129,3 +1129,555 @@ body {
     color: #62E6DA !important;
 }
 
+/* MetricTrust unified gradient section headings */
+.main-content .panel h2,
+.main-content .panel h3,
+.main-content .section-title,
+.main-content .panel-header h2,
+.main-content .panel-header h3 {
+    display: block;
+    color: #F4FBFF !important;
+    background: linear-gradient(
+        135deg,
+        #07131D 0%,
+        #0B2029 55%,
+        #10343A 100%
+    );
+    border-left: 3px solid #36D9D0;
+    border-radius: 8px;
+    padding: 12px 15px;
+    margin-top: 8px;
+    margin-bottom: 18px;
+    line-height: 1.35;
+    box-shadow: 0 4px 14px rgba(0, 190, 200, 0.08);
+}
+
+/* Keep small uppercase section labels readable */
+.main-content .panel .eyebrow {
+    color: #586F7C;
+}
+
+/* MetricTrust: consistent gradient heading blocks */
+.main-content .panel h1,
+.main-content .panel h2,
+.main-content .panel h3,
+.main-content .panel h4,
+.main-content .topbar h1,
+.main-content .welcome-row h2,
+.main-content .quality-panel h2,
+.main-content .quality-panel h3,
+.main-content .chart-title,
+.main-content .section-title {
+    color: #F4FBFF !important;
+    background: linear-gradient(135deg, #07131D 0%, #0B2029 55%, #10343A 100%) !important;
+    border-left: 3px solid #36D9D0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    line-height: 1.4;
+}
+
+/* MetricTrust: soft mint background for chart and investigation panels */
+.main-content .chart-container,
+.main-content .chart-panel,
+.main-content .investigation-panel,
+.main-content .signals-panel {
+    background: #E5F4F1 !important;
+    border-color: #B8DBD9;
+}
+
+/* Soft mint background for investigation and quality sections */
+.main-content .investigation-panel,
+.main-content .signals-panel,
+.main-content .quality-panel,
+.main-content .quality-reconciliation,
+.main-content .reconciliation-panel {
+    background-color: #E5F4F1 !important;
+    border-color: #B8DBD9 !important;
+}
+
+#trends,
+#investigations,
+#quality {
+    background: #E8E5F7 !important;
+    border-color: #C9C2EA !important;
+}
+/* MetricTrust: Ice Blue investigation panels — KPI cards untouched */
+/* Performance Monitoring: light blue outer section */
+
+#trends > .trend-panel {
+   background: #E8E5F7 !important;
+border: 1px solid #C9C2EA !important;
+    border-radius: 14px;
+}
+
+/* Keep the other two sections unchanged */
+#investigations,
+#quality {
+   background: #E8E5F7 !important;
+border: 1px solid #C9C2EA !important;
+    border-radius: 14px;
+}
+
+/* MetricTrust: Premium individual signal cards */
+#investigations .signal-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 16px;
+    margin: 12px 0;
+    background: linear-gradient(135deg, #0B2029, #10343A) !important;
+    border: 1px solid rgba(54, 217, 208, 0.28);
+    border-left: 4px solid #36D9D0;
+    border-radius: 12px;
+    box-shadow: 0 5px 14px rgba(11, 32, 41, 0.12);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#investigations .signal-row:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 9px 20px rgba(11, 32, 41, 0.2);
+}
+
+#investigations .signal-copy {
+    flex: 1;
+    min-width: 0;
+}
+
+#investigations .signal-copy strong {
+    display: block;
+    color: #F4FBFF !important;
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+#investigations .signal-copy p {
+    color: #B8CDD5 !important;
+    font-size: 12px;
+    margin: 0;
+}
+
+#investigations .signal-count {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 42px;
+    height: 42px;
+    padding: 0 10px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #36D9D0, #1BAAA7);
+    color: #071D31 !important;
+    font-size: 20px;
+    font-weight: 800;
+    box-shadow: 0 3px 10px rgba(54, 217, 208, 0.18);
+}
+
+#investigations .signal-indicator {
+    flex-shrink: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(54, 217, 208, 0.3);
+}
+
+#investigations .signal-indicator.amber {
+    background: #FFB547;
+}
+
+#investigations .signal-indicator.slate {
+    background: #8EA9BB;
+}
+
+#investigations .signal-indicator.aqua {
+    background: #36D9D0;
+}
+
+/* Match Performance Monitoring panel to Quality & Reconciliation */
+#trends {
+    background: #D8E8F8 !important;
+    border: 1px solid #B5CDE5 !important;
+    border-radius: 14px;
+}
+
+/* Match chart area with Performance Monitoring background */
+#trends .chart-container {
+    background: #D8E8F8 !important;
+}
+
+#trends .chart-canvas-wrap {
+    background: #D8E8F8 !important;
+}
+
+#trends #monthlyKpiChart {
+    background: transparent !important;
+}
+
+/* KPI Trends: Interpretation cards */
+.interpretation-panel > .signal-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px;
+    margin: 14px 0;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #211C35, #30264A) !important;
+    border: 1px solid #51416F;
+    border-left: 4px solid #A78BFA;
+    box-shadow: 0 5px 14px rgba(25, 18, 45, 0.12);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.interpretation-panel > .signal-row:nth-of-type(2) {
+    border-left-color: #60A5FA;
+}
+
+.interpretation-panel > .signal-row:nth-of-type(3) {
+    border-left-color: #F472B6;
+}
+
+.interpretation-panel > .signal-row:nth-of-type(4) {
+    border-left-color: #A78BFA;
+}
+
+.interpretation-panel .signal-copy {
+    flex: 1;
+}
+
+.interpretation-panel .signal-copy strong {
+    display: block;
+    color: #F5F3FF !important;
+    font-size: 14px;
+    margin-bottom: 7px;
+}
+
+.interpretation-panel .signal-copy p {
+    color: #D0C7E6 !important;
+    font-size: 12px;
+    margin: 0;
+}
+
+.interpretation-panel > .signal-row:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 9px 20px rgba(25, 18, 45, 0.2);
+}
+
+/* MetricTrust: Premium investigation data table */
+.investigation-table {
+    width: 100%;
+    border-collapse: separate !important;
+    border-spacing: 0;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #F5F8FC;
+    color: #203044;
+    font-size: 13px;
+}
+
+.investigation-table thead tr {
+    background: linear-gradient(135deg, #0B2029, #173C48);
+}
+
+.investigation-table thead th {
+    padding: 16px 14px !important;
+    color: #F4FBFF;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    border-bottom: 2px solid #36D9D0;
+    white-space: nowrap;
+}
+
+.investigation-table tbody td {
+    padding: 15px 14px !important;
+    color: #26384A;
+    border-bottom: 1px solid #DCE5EF;
+    background: #FFFFFF;
+    transition: background 0.2s ease;
+}
+
+.investigation-table tbody tr:nth-child(even) td {
+    background: #EDF3FA;
+}
+
+.investigation-table tbody tr:hover td {
+    background: #DDEBFA;
+}
+
+.investigation-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Keep the table readable on smaller screens */
+.investigation-table th,
+.investigation-table td {
+    text-align: left;
+    vertical-align: middle;
+}
+
+/* Investigation table: readable typography */
+.investigation-table {
+    font-size: 14px;
+    color: #203044;
+}
+
+.investigation-table thead th {
+    padding: 17px 14px !important;
+    font-size: 13px;
+    letter-spacing: 0.45px;
+}
+
+.investigation-table tbody td {
+    padding: 17px 14px !important;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Review signal badges */
+.review-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 11px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+.review-badge.warning {
+    background: #FFF0D5;
+    color: #8A5200;
+    border: 1px solid #F4D49A;
+}
+
+.review-badge.success {
+    background: #DDF6E8;
+    color: #176B45;
+    border: 1px solid #B8E8CD;
+}
+
+/* Investigations page: full-width premium navy header */
+.investigation-header {
+    background: linear-gradient(135deg, #0B2029, #10343A) !important;
+    color: #F4FBFF !important;
+    padding: 22px 24px !important;
+    margin: -1px -1px 24px !important;
+    border-radius: 14px 14px 0 0;
+    border-bottom: 3px solid #36D9D0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.investigation-header .eyebrow {
+    color: #9BB7C2 !important;
+    margin-bottom: 8px;
+}
+
+.investigation-header h2 {
+    color: #F4FBFF !important;
+    margin: 0;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+}
+
+/* Refresh button matches the navy header */
+.investigation-header #refreshInvestigations {
+    background: #DDF8F5 !important;
+    color: #0B2029 !important;
+    border: 1px solid #36D9D0 !important;
+    border-radius: 9px;
+    padding: 10px 15px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.investigation-header #refreshInvestigations:hover {
+    background: #36D9D0 !important;
+}
+
+
+/* Definition History — full-width registry header */
+.main-content .definition-registry-header {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    background: linear-gradient(135deg, #0B2029 0%, #10343A 100%) !important;
+    padding: 18px 20px !important;
+    margin: 24px 0 !important;
+    border-left: 3px solid #36D9D0 !important;
+    border-bottom: 3px solid #36D9D0 !important;
+    border-radius: 10px !important;
+    box-shadow: 0 5px 16px rgba(11, 32, 41, 0.12);
+}
+
+.main-content .definition-registry-header h2 {
+    color: #F4FBFF !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Definition History — top page title background */
+.page-title-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #0B2029, #10343A) !important;
+    color: #F4FBFF !important;
+    padding: 12px 18px !important;
+    border-left: 3px solid #36D9D0 !important;
+    border-radius: 9px !important;
+    margin: 0 !important;
+}
+
+/* Definition History — full page header panel */
+body:has(.page-title-badge) .topbar {
+    background: linear-gradient(135deg, #071E26, #10343B) !important;
+    border: 1px solid #24535A !important;
+    border-radius: 14px !important;
+    padding: 24px !important;
+    box-shadow: 0 6px 18px rgba(7, 30, 38, 0.12);
+}
+
+/* Header text */
+body:has(.page-title-badge) .topbar .eyebrow,
+body:has(.page-title-badge) .topbar .intro {
+    color: #D8E8F8 !important;
+}
+
+/* Keep the page title readable */
+body:has(.page-title-badge) .topbar .page-title-badge {
+    color: #FFFFFF !important;
+}
+
+/* MetricTrust — Definition History table */
+.definition-registry-header {
+    margin-bottom: 22px;
+}
+
+.table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid #D5E1EC;
+    border-radius: 14px;
+    background: #FFFFFF;
+    box-shadow: 0 8px 24px rgba(7, 30, 38, 0.07);
+}
+
+.table-wrap table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    text-align: left;
+    font-size: 14px;
+    color: #243B53;
+}
+
+.table-wrap thead th {
+    background: linear-gradient(135deg, #071E26, #10343B);
+    color: #F4FAFC;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.35px;
+    padding: 17px 14px;
+    border-bottom: 2px solid #28D8CE;
+    line-height: 1.5;
+}
+
+.table-wrap thead th:first-child {
+    border-top-left-radius: 12px;
+}
+
+.table-wrap thead th:last-child {
+    border-top-right-radius: 12px;
+}
+
+.table-wrap tbody td {
+    padding: 18px 14px;
+    border-bottom: 1px solid #DFE8F1;
+    line-height: 1.6;
+    vertical-align: middle;
+    overflow-wrap: anywhere;
+}
+
+.table-wrap tbody tr:nth-child(odd) {
+    background: #FFFFFF;
+}
+
+.table-wrap tbody tr:nth-child(even) {
+    background: #F0F5FA;
+}
+
+.table-wrap tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.table-wrap tbody tr:hover {
+    background: #DFF5F2;
+}
+
+.table-wrap tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table-wrap tbody td:nth-child(1) {
+    font-weight: 600;
+    color: #173D48;
+}
+
+.table-wrap tbody td:nth-child(3) {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Highlight current metric version */
+.table-wrap tbody td strong {
+    color: #087F5B;
+    background: #DDF7E9;
+    border-radius: 6px;
+    padding: 5px 9px;
+    display: inline-block;
+    font-size: 12px;
+}
+
+/* Responsive table on smaller screens */
+@media (max-width: 900px) {
+    .table-wrap table {
+        min-width: 950px;
+    }
+}
+
+/* Definition History — prevent date columns from wrapping */
+.table-wrap table {
+    table-layout: auto;
+    min-width: 1250px;
+}
+
+.table-wrap thead th:nth-child(6),
+.table-wrap tbody td:nth-child(6),
+.table-wrap thead th:nth-child(7),
+.table-wrap tbody td:nth-child(7) {
+    min-width: 110px;
+    width: 110px;
+    white-space: nowrap;
+}
+
+.table-wrap thead th:nth-child(8),
+.table-wrap tbody td:nth-child(8) {
+    min-width: 105px;
+    white-space: nowrap;
+}
+
+
+
+
+
+
+

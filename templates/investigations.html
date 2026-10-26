@@ -85,7 +85,7 @@
         </section>
 
         <section class="panel">
-            <div class="panel-header">
+           <div class="panel-header investigation-header">
                 <div>
                     <p class="eyebrow">INVESTIGATION QUEUE</p>
                     <h2>Review monthly KPI records</h2>
@@ -108,7 +108,7 @@
             <p id="investigationStatus" role="status">Loading monthly records…</p>
 
             <div style="width:100%; overflow-x:auto;">
-                <table style="width:100%; border-collapse:collapse; text-align:left;">
+               <table class="investigation-table" style="width:100%; border-collapse:collapse; text-align:left;">
                     <thead>
                         <tr>
                             <th style="padding:14px;">Month</th>
@@ -165,6 +165,35 @@
         <footer class="page-footer">
             MetricTrust · KPI Drift & Reconciliation Auditor
         </footer>
+        
+<section id="investigationDetails" class="panel" hidden>
+    <h2>Investigation Details</h2>
+    <p id="detailMonth" class="muted"></p>
+
+    <div class="detail-grid">
+        <div>
+            <strong>Total requests</strong>
+            <p id="detailTotal">—</p>
+        </div>
+        <div>
+            <strong>Closed requests</strong>
+            <p id="detailClosed">—</p>
+        </div>
+        <div>
+            <strong>Closure rate</strong>
+            <p id="detailRate">—</p>
+        </div>
+        <div>
+            <strong>Missing closure dates</strong>
+            <p id="detailMissing">—</p>
+        </div>
+    </div>
+
+    <button type="button" onclick="closeInvestigationDetails()">
+        Close details
+    </button>
+</section>
+
     </main>
 </div>
 
@@ -237,7 +266,14 @@ function renderInvestigationRows() {
     tbody.innerHTML = filtered.map(row => {
         const missing = Number(row.missing_closed_dates || 0);
         const rate = Number(row.closure_rate_pct || 0);
-        const signal = missing > 0 ? "Review data quality" : "No missing dates flagged";
+        const signal = missing > 0
+    ? `<button type="button"
+        class="review-badge warning"
+        onclick="openInvestigationDetails('${escapeHTML(row.month ?? "")}')">
+        Review data quality
+      </button>`
+    : `<span class="review-badge success">No missing dates flagged</span>`;
+
 
         return `<tr>
             <td style="padding:14px;">${escapeHTML(row.month ?? "—")}</td>
@@ -248,6 +284,43 @@ function renderInvestigationRows() {
             <td style="padding:14px;">${signal}</td>
         </tr>`;
     }).join("");
+}
+
+function openInvestigationDetails(month) {
+    const row = investigationData.find(
+        item => String(item.month) === String(month)
+    );
+
+    if (!row) {
+        alert("No investigation data found for this month.");
+        return;
+    }
+
+    document.getElementById("detailMonth").textContent =
+        "Month: " + row.month;
+
+    document.getElementById("detailTotal").textContent =
+        numberFormat(row.total_requests);
+
+    document.getElementById("detailClosed").textContent =
+        numberFormat(row.closed_requests);
+
+    document.getElementById("detailRate").textContent =
+        Number(row.closure_rate_pct).toFixed(2) + "%";
+
+    document.getElementById("detailMissing").textContent =
+        numberFormat(row.missing_closed_dates);
+
+    document.getElementById("investigationDetails").hidden = false;
+
+    document.getElementById("investigationDetails").scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
+}
+
+function closeInvestigationDetails() {
+    document.getElementById("investigationDetails").hidden = true;
 }
 
 function escapeHTML(value) {
