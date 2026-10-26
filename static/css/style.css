@@ -1445,6 +1445,7 @@ border: 1px solid #C9C2EA !important;
     font-weight: 600;
     line-height: 1.4;
     white-space: nowrap;
+    cursor: default;
 }
 
 .review-badge.warning {

@@ -194,6 +194,10 @@
     <span id="detailSeverity" class="severity-badge"></span>
     <p id="detailInsightText"></p>
 </div>
+<div class="recommended-action">
+    <strong>Recommended next action</strong>
+    <p id="detailNextAction">Select a month to see the recommended action.</p>
+</div>
 
 
     <button type="button" onclick="closeInvestigationDetails()">
@@ -324,6 +328,15 @@ const closureRate = Number(row.closure_rate_pct);
 
 const insightText = document.getElementById("detailInsightText");
 const severityBadge = document.getElementById("detailSeverity");
+const nextAction = document.getElementById("detailNextAction");
+
+if (missingDates > 0) {
+    nextAction.textContent =
+        `Validate the ${missingDates} missing closure date(s) for ${row.month}, then recalculate the closure rate.`;
+} else {
+    nextAction.textContent =
+        `No missing closure dates reported for ${row.month}. Continue routine KPI validation and verify the metric definition.`;
+}
 
 if (missingDates > 0) {
     severityBadge.textContent = "Review Required";
