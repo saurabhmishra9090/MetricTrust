@@ -253,6 +253,55 @@ def reconciliation_api():
         return jsonify({
             "error": "Unable to calculate reconciliation results."
         }), 500
+    
+@app.route("/api/investigation-cases", methods=["GET", "POST"])
+def investigation_cases_api():
+    con = duckdb.connect(str(DB_FILE))
+
+    try:
+        if request.method == "GET":
+            cases = con.execute("""
+                SELECT case_id, month, status, analyst_notes,
+                       created_at, updated_at
+                FROM investigation_cases
+                ORDER BY created_at DESC
+            """).fetchdf()
+
+            return jsonify(cases.to_dict(orient="records"))
+
+        payload = request.get_json(silent=True) or {}
+        month = str(payload.get("month", "")).strip()
+
+        if not month:
+            return jsonify({"error": "Month is required."}), 400
+
+        notes = str(payload.get("analyst_notes", "")).strip()
+
+        result = con.execute("""
+           INSERT INTO investigation_cases (
+    case_id, month, analyst_notes
+)
+VALUES (nextval('investigation_case_seq'), ?, ?)
+RETURNING case_id, month, status, analyst_notes,
+          created_at, updated_at
+        """, [month, notes]).fetchone()
+
+        return jsonify({
+            "case_id": result[0],
+            "month": result[1],
+            "status": result[2],
+            "analyst_notes": result[3],
+            "created_at": str(result[4]),
+            "updated_at": str(result[5])
+        }), 201
+
+    except Exception:
+        app.logger.exception("Investigation cases API failed")
+        return jsonify({"error": "Unable to process investigation case."}), 500
+
+    finally:
+        con.close()
+
 
 @app.route("/api/assistant", methods=["POST"])
 def assistant_api():
