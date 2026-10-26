@@ -188,6 +188,12 @@
             <p id="detailMissing">—</p>
         </div>
     </div>
+    
+<div id="detailInsight" class="detail-insight">
+    <strong>Investigation insight</strong>
+    <p id="detailInsightText"></p>
+</div>
+
 
     <button type="button" onclick="closeInvestigationDetails()">
         Close details
@@ -310,6 +316,20 @@ function openInvestigationDetails(month) {
 
     document.getElementById("detailMissing").textContent =
         numberFormat(row.missing_closed_dates);
+
+        
+const missingDates = Number(row.missing_closed_dates) || 0;
+const closureRate = Number(row.closure_rate_pct);
+
+const insightText = document.getElementById("detailInsightText");
+
+if (missingDates > 0) {
+    insightText.textContent =
+        `Review recommended: ${missingDates} missing closure date(s) found for ${row.month}. Validate these records before interpreting the KPI.`;
+} else {
+    insightText.textContent =
+        `No missing closure dates reported for ${row.month}. Closure rate is ${closureRate.toFixed(2)}%. Continue routine validation before drawing conclusions.`;
+}
 
     document.getElementById("investigationDetails").hidden = false;
 
