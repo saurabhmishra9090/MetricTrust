@@ -8,10 +8,29 @@ app = Flask(__name__)
 
 DB_FILE = Path(__file__).resolve().parent / "data" / "metrictrust.duckdb"
 
+def init_investigation_cases():
+    con = duckdb.connect(str(DB_FILE))
+    try:
+        con.execute("CREATE SEQUENCE IF NOT EXISTS investigation_case_seq START 1")
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS investigation_cases (
+              case_id BIGINT PRIMARY KEY DEFAULT nextval('investigation_case_seq'),
+                month VARCHAR NOT NULL,
+                status VARCHAR NOT NULL DEFAULT 'Open',
+                analyst_notes VARCHAR DEFAULT '',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+    finally:
+        con.close()
 
+
+init_investigation_cases()
 def fetch_dashboard_data():
     if not DB_FILE.exists():
         raise FileNotFoundError("MetricTrust database was not found.")
+    
 
     con = duckdb.connect(str(DB_FILE), read_only=True)
 
