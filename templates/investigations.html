@@ -191,6 +191,7 @@
     
 <div id="detailInsight" class="detail-insight">
     <strong>Investigation insight</strong>
+    <span id="detailSeverity" class="severity-badge"></span>
     <p id="detailInsightText"></p>
 </div>
 
@@ -322,6 +323,15 @@ const missingDates = Number(row.missing_closed_dates) || 0;
 const closureRate = Number(row.closure_rate_pct);
 
 const insightText = document.getElementById("detailInsightText");
+const severityBadge = document.getElementById("detailSeverity");
+
+if (missingDates > 0) {
+    severityBadge.textContent = "Review Required";
+    severityBadge.className = "severity-badge severity-warning";
+} else {
+    severityBadge.textContent = "Routine Check";
+    severityBadge.className = "severity-badge severity-success";
+}
 
 if (missingDates > 0) {
     insightText.textContent =

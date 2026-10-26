@@ -1783,7 +1783,29 @@ body:has(.page-title-badge) .topbar .page-title-badge {
         font-size: 24px;
     }
 }
+/* MetricTrust Investigation Severity Badge */
+.severity-badge {
+    display: inline-flex;
+    align-items: center;
+    margin: 0 8px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
 
+.severity-warning {
+    color: #92400E;
+    background: #FEF3C7;
+    border: 1px solid #F59E0B;
+}
+
+.severity-success {
+    color: #166534;
+    background: #DCFCE7;
+    border: 1px solid #86EFAC;
+}
 
 
 
