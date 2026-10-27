@@ -9,11 +9,11 @@
     --color-warning: #E9A23B;
     --color-error: #D94841;
 
-    --bg: var(--color-ghost-white);
-    --surface: #FFFFFF;
-    --text: var(--color-black);
-    --muted: var(--color-blue-slate);
-    --border: #E0E5E9;
+    --bg: #0B1720;
+--surface: #11232E;
+--text: #E8F0F4;
+--muted: #A8BEC8;
+--border: #29414D;
 
     --sidebar-width: 250px;
     --radius: 16px;
@@ -1184,40 +1184,36 @@ body {
 .main-content .chart-panel,
 .main-content .investigation-panel,
 .main-content .signals-panel {
-    background: #E5F4F1 !important;
-    border-color: #B8DBD9;
+   background: #0B1720 !important;
+border-color: #29414D !important;
 }
 
-/* Soft mint background for investigation and quality sections */
+/* Dark theme for investigation and quality sections */
 .main-content .investigation-panel,
 .main-content .signals-panel,
 .main-content .quality-panel,
 .main-content .quality-reconciliation,
 .main-content .reconciliation-panel {
-    background-color: #E5F4F1 !important;
-    border-color: #B8DBD9 !important;
+    background-color: #11232E !important;
+    border-color: #29414D !important;
 }
 
 #trends,
 #investigations,
 #quality {
-    background: #E8E5F7 !important;
-    border-color: #C9C2EA !important;
+    background: #0B1720 !important;
+    border-color: #29414D !important;
 }
 /* MetricTrust: Ice Blue investigation panels — KPI cards untouched */
 /* Performance Monitoring: light blue outer section */
 
-#trends > .trend-panel {
-   background: #E8E5F7 !important;
-border: 1px solid #C9C2EA !important;
-    border-radius: 14px;
-}
 
-/* Keep the other two sections unchanged */
+/* MetricTrust: keep investigation and quality sections dark */
+#trends > .trend-panel,
 #investigations,
 #quality {
-   background: #E8E5F7 !important;
-border: 1px solid #C9C2EA !important;
+    background: #0B1720 !important;
+    border: 1px solid #29414D !important;
     border-radius: 14px;
 }
 
@@ -1303,11 +1299,13 @@ border: 1px solid #C9C2EA !important;
 
 /* Match chart area with Performance Monitoring background */
 #trends .chart-container {
-    background: #D8E8F8 !important;
+    background: #11232E !important;
+    border-radius: 12px;
 }
 
 #trends .chart-canvas-wrap {
-    background: #D8E8F8 !important;
+    background: #11232E !important;
+    border-radius: 8px;
 }
 
 #trends #monthlyKpiChart {
@@ -1807,10 +1805,43 @@ body:has(.page-title-badge) .topbar .page-title-badge {
     background: #DCFCE7;
     border: 1px solid #86EFAC;
 }
+/* MetricTrust UI polish: dark outer analytics panels */
+.main-content .chart-container,
+.main-content .chart-panel,
+.main-content .investigation-panel,
+.main-content .signals-panel,
+.main-content .quality-panel,
+.main-content .quality-reconciliation,
+.main-content .reconciliation-panel {
+    background-color: #0B1720 !important;
+    border-color: #29414D !important;
+}
+/* MetricTrust: Improve Interpret Carefully readability */
+.main-content .review-note {
+    background: #12343A !important;
+    border: 1px solid #36D9D0 !important;
+    border-left: 4px solid #36D9D0 !important;
+    border-radius: 12px;
+    padding: 18px !important;
+    color: #D8E6EC !important;
+}
 
+.main-content .review-note strong {
+    color: #FFFFFF !important;
+    display: block;
+    margin-bottom: 8px;
+}
 
-
-
+.main-content .review-note p {
+    color: #C2D4DC !important;
+    margin: 0;
+    line-height: 1.6;
+}
+.metrictrust-insight-visual img {
+    filter: none;
+    mix-blend-mode: normal;
+    opacity: 1;
+}
 
 
 
