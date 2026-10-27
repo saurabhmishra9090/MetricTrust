@@ -447,7 +447,40 @@ def update_investigation_case(case_id):
     finally:
         con.close()
 
+@app.route("/api/investigation-cases/<int:case_id>/history", methods=["GET"])
+def investigation_case_history(case_id):
+    con = None
 
+    try:
+        con = duckdb.connect(str(DB_FILE), read_only=True)
+
+        history = con.execute(
+            """
+            SELECT
+                history_id,
+                case_id,
+                field_name,
+                old_value,
+                new_value,
+                changed_at
+            FROM investigation_case_history
+            WHERE case_id = ?
+            ORDER BY changed_at DESC, history_id DESC
+            """,
+            [case_id]
+        ).fetchdf()
+
+        return jsonify(history.to_dict(orient="records"))
+
+    except Exception:
+        app.logger.exception("Investigation case history failed")
+        return jsonify({
+            "error": "Unable to load investigation case history."
+        }), 500
+
+    finally:
+        if con is not None:
+            con.close()
 @app.route("/api/assistant", methods=["POST"])
 def assistant_api():
     try:

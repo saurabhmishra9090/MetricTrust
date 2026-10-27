@@ -543,6 +543,16 @@
     </div>
 </section>
 
+<section id="caseHistory" class="panel">
+    <h2>Investigation Case History</h2>
+    <p class="muted">Review previous status and analyst note changes.</p>
+
+    <div id="caseHistoryList">
+        <p class="muted">Case history will appear here.</p>
+    </div>
+</section>
+
+
 
     </main>
 </div>
@@ -981,6 +991,79 @@ document.getElementById("refreshCasesBtn").addEventListener(
 
 loadInvestigationCases();
 
+async function loadInvestigationCaseHistory() {
+    const historyList = document.getElementById("caseHistoryList");
+
+    if (!historyList) return;
+
+    historyList.innerHTML = '<p class="muted">Loading case history...</p>';
+
+    try {
+        const response = await fetch("/api/investigation-cases");
+        if (!response.ok) {
+            throw new Error("Could not load investigation cases.");
+        }
+
+        const cases = await response.json();
+
+        if (!cases.length) {
+            historyList.innerHTML = '<p class="muted">No investigation cases found.</p>';
+            return;
+        }
+
+        const histories = await Promise.all(
+            cases.map(async (item) => {
+                const result = await fetch(
+                    `/api/investigation-cases/${item.case_id}/history`
+                );
+
+                if (!result.ok) {
+                    throw new Error(`Could not load history for Case #${item.case_id}.`);
+                }
+
+                return await result.json();
+            })
+        );
+
+        const entries = histories.flat();
+
+        if (!entries.length) {
+            historyList.innerHTML = '<p class="muted">No changes recorded yet.</p>';
+            return;
+        }
+
+        entries.sort(
+            (a, b) => new Date(b.changed_at) - new Date(a.changed_at)
+        );
+
+        historyList.replaceChildren();
+
+        entries.forEach((entry) => {
+            const card = document.createElement("article");
+            card.className = "case-history-card";
+
+            const heading = document.createElement("h3");
+            heading.textContent = `Case #${entry.case_id} — ${entry.field_name}`;
+
+            const change = document.createElement("p");
+            change.textContent =
+                `${entry.old_value ?? "(empty)"} → ${entry.new_value ?? "(empty)"}`;
+
+            const timestamp = document.createElement("p");
+            timestamp.className = "muted";
+            timestamp.textContent = new Date(entry.changed_at).toLocaleString();
+
+            card.append(heading, change, timestamp);
+            historyList.appendChild(card);
+        });
+
+    } catch (error) {
+        console.error("Case history error:", error);
+        historyList.innerHTML =
+            '<p class="muted">Unable to load case history. Check the server logs.</p>';
+    }
+}
+loadInvestigationCaseHistory();
 </script>
 </body>
 </html>
