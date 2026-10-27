@@ -12,6 +12,7 @@ def init_investigation_cases():
     con = duckdb.connect(str(DB_FILE))
     try:
         con.execute("CREATE SEQUENCE IF NOT EXISTS investigation_case_seq START 1")
+        con.execute("CREATE SEQUENCE IF NOT EXISTS investigation_case_history_seq START 1")
         con.execute("""
             CREATE TABLE IF NOT EXISTS investigation_cases (
               case_id BIGINT PRIMARY KEY DEFAULT nextval('investigation_case_seq'),
@@ -24,7 +25,7 @@ def init_investigation_cases():
         """)
         con.execute("""
             CREATE TABLE IF NOT EXISTS investigation_case_history (
-                history_id BIGINT PRIMARY KEY,
+               history_id BIGINT PRIMARY KEY DEFAULT nextval('investigation_case_history_seq'),
                 case_id BIGINT NOT NULL,
                 field_name VARCHAR NOT NULL,
                 old_value VARCHAR,
@@ -354,7 +355,7 @@ def update_investigation_case(case_id):
     try:
         existing = con.execute(
             """
-            SELECT case_id
+           SELECT case_id, status, analyst_notes
             FROM investigation_cases
             WHERE case_id = ?
             """,
@@ -365,6 +366,27 @@ def update_investigation_case(case_id):
             return jsonify({
                 "error": "Investigation case not found."
             }), 404
+        
+        if status is not None and status != existing[1]:
+            con.execute(
+                """
+                INSERT INTO investigation_case_history
+                   (history_id, case_id, field_name, old_value, new_value)
+                VALUES (nextval('investigation_case_history_seq'), ?, ?, ?, ?)
+                """,
+                [case_id, "status", existing[1], status]
+            )
+
+        if notes is not None and notes != existing[2]:
+            con.execute(
+                """
+                INSERT INTO investigation_case_history
+                   (history_id, case_id, field_name, old_value, new_value)
+               VALUES (nextval('investigation_case_history_seq'), ?, ?, ?, ?)
+                """,
+                [case_id, "analyst_notes", existing[2], notes]
+            )
+
 
         if status is not None and notes is not None:
             con.execute(
