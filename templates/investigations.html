@@ -193,6 +193,60 @@
 #caseList #caseFilterEmpty[hidden] {
     display: none !important;
 }
+
+/* Investigation case summary cards */
+#caseManagement .case-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin: 22px 0;
+}
+
+#caseManagement .case-summary-card {
+    padding: 20px;
+    background: #11232e;
+    border: 1px solid #294653;
+    border-radius: 14px;
+    border-top: 3px solid #27d7c4;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+#caseManagement .case-summary-card:hover {
+    transform: translateY(-3px);
+    border-color: #27d7c4;
+}
+
+#caseManagement .case-summary-card p {
+    margin: 0 0 12px;
+    color: #a8bec8;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+#caseManagement .case-summary-card h3 {
+    margin: 0 0 8px;
+    color: #f0f8fa;
+    font-size: 32px;
+    line-height: 1.2;
+}
+
+#caseManagement .case-summary-card span {
+    color: #91a9b4;
+    font-size: 12px;
+}
+
+@media (max-width: 900px) {
+    #caseManagement .case-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    #caseManagement .case-summary-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 </style>
 
 </head>
@@ -427,7 +481,34 @@
         <button type="button" id="refreshCasesBtn">Refresh Cases</button>
     </div>
     
-<div class="case-filters">
+
+<div class="case-summary-grid">
+    <article class="case-summary-card">
+        <p>Total Cases</p>
+        <h3 id="totalCasesCount">0</h3>
+        <span>All investigation cases</span>
+    </article>
+
+    <article class="case-summary-card">
+        <p>Open</p>
+        <h3 id="openCasesCount">0</h3>
+        <span>Awaiting investigation</span>
+    </article>
+
+    <article class="case-summary-card">
+        <p>In Progress</p>
+        <h3 id="inProgressCasesCount">0</h3>
+        <span>Currently under review</span>
+    </article>
+
+    <article class="case-summary-card">
+        <p>Resolved</p>
+        <h3 id="resolvedCasesCount">0</h3>
+        <span>Marked as resolved</span>
+    </article>
+</div>
+
+    <div class="case-filters">
     <div class="case-filter-field">
         <label for="caseSearchInput">Search cases</label>
         <input
@@ -749,6 +830,16 @@ async function loadInvestigationCases() {
         }
 
         const cases = await response.json();
+        document.getElementById("totalCasesCount").textContent = cases.length;
+
+document.getElementById("openCasesCount").textContent =
+    cases.filter(item => item.status === "Open").length;
+
+document.getElementById("inProgressCasesCount").textContent =
+    cases.filter(item => item.status === "In Progress").length;
+
+document.getElementById("resolvedCasesCount").textContent =
+    cases.filter(item => item.status === "Resolved").length;
         caseList.replaceChildren();
 
         if (!cases.length) {
