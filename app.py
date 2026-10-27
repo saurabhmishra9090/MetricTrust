@@ -22,6 +22,16 @@ def init_investigation_cases():
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS investigation_case_history (
+                history_id BIGINT PRIMARY KEY,
+                case_id BIGINT NOT NULL,
+                field_name VARCHAR NOT NULL,
+                old_value VARCHAR,
+                new_value VARCHAR,
+                changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)    
     finally:
         con.close()
 
@@ -314,6 +324,7 @@ def investigation_cases_api():
 
 
 @app.route("/api/investigation-cases/<int:case_id>", methods=["PATCH"])
+
 def update_investigation_case(case_id):
     payload = request.get_json(silent=True) or {}
 
@@ -339,43 +350,62 @@ def update_investigation_case(case_id):
         }), 400
 
     con = duckdb.connect(str(DB_FILE))
+
     try:
         existing = con.execute(
-            "SELECT case_id FROM investigation_cases WHERE case_id = ?",
+            """
+            SELECT case_id
+            FROM investigation_cases
+            WHERE case_id = ?
+            """,
             [case_id]
         ).fetchone()
 
         if existing is None:
-            return jsonify({"error": "Investigation case not found."}), 404
+            return jsonify({
+                "error": "Investigation case not found."
+            }), 404
 
         if status is not None and notes is not None:
-            con.execute("""
+            con.execute(
+                """
                 UPDATE investigation_cases
                 SET status = ?, analyst_notes = ?,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE case_id = ?
-            """, [status, notes, case_id])
+                """,
+                [status, notes, case_id]
+            )
 
         elif status is not None:
-            con.execute("""
+            con.execute(
+                """
                 UPDATE investigation_cases
                 SET status = ?, updated_at = CURRENT_TIMESTAMP
                 WHERE case_id = ?
-            """, [status, case_id])
+                """,
+                [status, case_id]
+            )
 
         elif notes is not None:
-            con.execute("""
+            con.execute(
+                """
                 UPDATE investigation_cases
                 SET analyst_notes = ?, updated_at = CURRENT_TIMESTAMP
                 WHERE case_id = ?
-            """, [notes, case_id])
+                """,
+                [notes, case_id]
+            )
 
-        updated = con.execute("""
+        updated = con.execute(
+            """
             SELECT case_id, month, status, analyst_notes,
                    created_at, updated_at
             FROM investigation_cases
             WHERE case_id = ?
-        """, [case_id]).fetchone()
+            """,
+            [case_id]
+        ).fetchone()
 
         return jsonify({
             "case_id": updated[0],
@@ -388,10 +418,13 @@ def update_investigation_case(case_id):
 
     except Exception:
         app.logger.exception("Investigation case update failed")
-        return jsonify({"error": "Unable to update investigation case."}), 500
+        return jsonify({
+            "error": "Unable to update investigation case."
+        }), 500
 
     finally:
         con.close()
+
 
 @app.route("/api/assistant", methods=["POST"])
 def assistant_api():
