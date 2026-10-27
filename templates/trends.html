@@ -103,6 +103,21 @@
     </div>
 </section>
 
+<section class="panel" id="anomalyDetection">
+    <div class="panel-header">
+        <div>
+            <p class="eyebrow">RISK MONITORING</p>
+            <h2>KPI Anomaly Detection</h2>
+        </div>
+        <span class="mini-tag">Automated Alerts</span>
+    </div>
+
+    <div id="anomalyContent">
+        <p>Scanning monthly KPI data for unusual changes...</p>
+    </div>
+</section>
+
+
 
             <section class="panel">
                 <div class="panel-header">
@@ -480,6 +495,107 @@ function renderMonthlyInsights() {
 loadMonthlyColumnData();
 
 loadTrendData();
+
+async function loadKPIAnomalies() {
+   const container = document.getElementById("anomalyContent");
+
+    if (!container) {
+        console.error("Anomaly container not found.");
+        return;
+    }
+
+    try {
+        const response = await fetch("/api/monthly-kpis");
+
+        if (!response.ok) {
+            throw new Error(`API returned ${response.status}`);
+        }
+
+        const rows = await response.json();
+
+        if (!Array.isArray(rows) || rows.length < 2) {
+            container.textContent =
+                "Not enough monthly data to detect KPI anomalies.";
+            return;
+        }
+
+        const alerts = [];
+
+        for (let i = 1; i < rows.length; i++) {
+            const previous = rows[i - 1];
+            const current = rows[i];
+
+            const previousRequests = Number(previous.total_requests) || 0;
+            const currentRequests = Number(current.total_requests) || 0;
+
+            const previousClosure = Number(previous.closure_rate_pct) || 0;
+            const currentClosure = Number(current.closure_rate_pct) || 0;
+
+            const previousMissing = Number(previous.missing_closed_dates) || 0;
+            const currentMissing = Number(current.missing_closed_dates) || 0;
+
+            if (previousRequests > 0) {
+                const change =
+                    ((currentRequests - previousRequests) /
+                    previousRequests) * 100;
+
+                if (Math.abs(change) >= 5) {
+                    alerts.push({
+                        month: current.month,
+                        title: "Request volume anomaly",
+                        detail: `${change > 0 ? "+" : ""}${change.toFixed(2)}% change compared with the previous month.`,
+                        severity: "Review"
+                    });
+                }
+            }
+
+            const closureChange = currentClosure - previousClosure;
+
+            if (Math.abs(closureChange) >= 2) {
+                alerts.push({
+                    month: current.month,
+                    title: "Closure rate anomaly",
+                    detail: `${closureChange > 0 ? "+" : ""}${closureChange.toFixed(2)} percentage-point change.`,
+                    severity: "Review"
+                });
+            }
+
+            if (currentMissing > previousMissing) {
+                alerts.push({
+                    month: current.month,
+                    title: "Data quality warning",
+                    detail: `Missing closure dates increased from ${previousMissing} to ${currentMissing}.`,
+                    severity: "Warning"
+                });
+            }
+        }
+
+        if (alerts.length === 0) {
+            container.innerHTML =
+                "<p>No anomalies detected using the current thresholds.</p>";
+            return;
+        }
+
+        container.innerHTML = alerts.map(alert => `
+            <article class="signal-row">
+                <div class="signal-copy">
+                    <strong>${alert.title}</strong>
+                    <p>Month: ${alert.month}</p>
+                    <p>${alert.detail}</p>
+                    <small>Status: ${alert.severity}</small>
+                </div>
+            </article>
+        `).join("");
+
+    } catch (error) {
+        console.error("KPI anomaly detection error:", error);
+        container.textContent =
+            "Could not analyze KPI data. Check the Flask server.";
+    }
+}
+
+loadKPIAnomalies();
+
     </script>
 </body>
 </html>
