@@ -205,6 +205,45 @@
     </button>
 </section>
 
+<section id="caseManagement" class="panel">
+    <h2>Investigation Case Management</h2>
+    <p class="muted">
+        Create investigation cases, track status, and maintain analyst notes.
+    </p>
+
+    <form id="createCaseForm">
+        <label for="caseMonth">Investigation month</label>
+        <input
+            type="month"
+            id="caseMonth"
+            name="month"
+            required
+        >
+
+        <label for="caseNotes">Analyst notes</label>
+        <textarea
+            id="caseNotes"
+            name="analyst_notes"
+            rows="3"
+            placeholder="Describe the investigation..."
+        ></textarea>
+
+        <button type="submit">Create Investigation Case</button>
+    </form>
+
+    <div class="case-list-header">
+        <h3>Investigation Cases</h3>
+        <button type="button" id="refreshCasesBtn">Refresh Cases</button>
+    </div>
+
+    <p id="caseMessage" class="muted" role="status"></p>
+
+    <div id="caseList">
+        <p class="muted">Loading investigation cases...</p>
+    </div>
+</section>
+
+
     </main>
 </div>
 
@@ -411,6 +450,158 @@ async function loadReconciliation() {
     }
 }
 loadReconciliation();
+
+async function loadInvestigationCases() {
+    const caseList = document.getElementById("caseList");
+    const message = document.getElementById("caseMessage");
+
+    caseList.textContent = "Loading cases...";
+
+    try {
+        const response = await fetch("/api/investigation-cases");
+        if (!response.ok) {
+            throw new Error("Could not load cases.");
+        }
+
+        const cases = await response.json();
+        caseList.replaceChildren();
+
+        if (!cases.length) {
+            caseList.textContent = "No investigation cases found.";
+            return;
+        }
+
+        cases.forEach(item => {
+            const card = document.createElement("div");
+            card.className = "panel case-card";
+
+            const heading = document.createElement("h3");
+            heading.textContent = `Case #${item.case_id} — ${item.month}`;
+
+            const statusLabel = document.createElement("label");
+            statusLabel.textContent = "Status";
+
+            const status = document.createElement("select");
+            ["Open", "In Progress", "Resolved"].forEach(value => {
+                const option = document.createElement("option");
+                option.value = value;
+                option.textContent = value;
+                status.appendChild(option);
+            });
+            status.value = item.status;
+
+            const notesLabel = document.createElement("label");
+            notesLabel.textContent = "Analyst notes";
+
+            const notes = document.createElement("textarea");
+            notes.rows = 3;
+            notes.value = item.analyst_notes || "";
+
+            const saveButton = document.createElement("button");
+            saveButton.type = "button";
+            saveButton.textContent = "Save Changes";
+
+            saveButton.addEventListener("click", async () => {
+                saveButton.disabled = true;
+                message.textContent = `Saving case #${item.case_id}...`;
+
+                try {
+                    const updateResponse = await fetch(
+                        `/api/investigation-cases/${item.case_id}`,
+                        {
+                            method: "PATCH",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                status: status.value,
+                                analyst_notes: notes.value
+                            })
+                        }
+                    );
+
+                    const result = await updateResponse.json();
+
+                    if (!updateResponse.ok) {
+                        throw new Error(
+                            result.error || "Could not save changes."
+                        );
+                    }
+
+                    message.textContent = `Case #${item.case_id} updated successfully.`;
+                    await loadInvestigationCases();
+                } catch (error) {
+                    message.textContent = error.message;
+                } finally {
+                    saveButton.disabled = false;
+                }
+            });
+
+            card.append(
+                heading,
+                statusLabel,
+                status,
+                notesLabel,
+                notes,
+                saveButton
+            );
+
+            caseList.appendChild(card);
+        });
+    } catch (error) {
+        caseList.textContent = "Could not load investigation cases.";
+        message.textContent = error.message;
+    }
+}
+
+document.getElementById("createCaseForm").addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const month = document.getElementById("caseMonth").value;
+    const notes = document.getElementById("caseNotes").value;
+    const message = document.getElementById("caseMessage");
+
+    const button = event.currentTarget.querySelector(
+        'button[type="submit"]'
+    );
+    button.disabled = true;
+    message.textContent = "Creating case...";
+
+    try {
+        const response = await fetch("/api/investigation-cases", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                month,
+                analyst_notes: notes
+            })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.error || "Could not create case.");
+        }
+
+        message.textContent = `Case #${result.case_id} created successfully.`;
+        event.currentTarget.reset();
+        await loadInvestigationCases();
+    } catch (error) {
+        message.textContent = error.message;
+    } finally {
+        button.disabled = false;
+    }
+});
+
+document.getElementById("refreshCasesBtn").addEventListener(
+    "click",
+    loadInvestigationCases
+);
+
+loadInvestigationCases();
+
 </script>
 </body>
 </html>

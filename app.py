@@ -256,34 +256,41 @@ def reconciliation_api():
     
 @app.route("/api/investigation-cases", methods=["GET", "POST"])
 def investigation_cases_api():
-    con = duckdb.connect(str(DB_FILE))
-
-    try:
-        if request.method == "GET":
+    if request.method == "GET":
+        con = None
+        try:
+            con = duckdb.connect(str(DB_FILE), read_only=True)
             cases = con.execute("""
                 SELECT case_id, month, status, analyst_notes,
                        created_at, updated_at
                 FROM investigation_cases
                 ORDER BY created_at DESC
             """).fetchdf()
-
             return jsonify(cases.to_dict(orient="records"))
+        except Exception:
+            app.logger.exception("Investigation cases GET failed")
+            return jsonify({
+                "error": "Unable to load investigation cases."
+            }), 500
+        finally:
+            if con is not None:
+                con.close()
 
-        payload = request.get_json(silent=True) or {}
-        month = str(payload.get("month", "")).strip()
+    # POST: create a new investigation case.
+    payload = request.get_json(silent=True) or {}
+    month = str(payload.get("month", "")).strip()
+    if not month:
+        return jsonify({"error": "Month is required."}), 400
 
-        if not month:
-            return jsonify({"error": "Month is required."}), 400
-
-        notes = str(payload.get("analyst_notes", "")).strip()
-
+    notes = str(payload.get("analyst_notes", "")).strip()
+    con = None
+    try:
+        con = duckdb.connect(str(DB_FILE))
         result = con.execute("""
-           INSERT INTO investigation_cases (
-    case_id, month, analyst_notes
-)
-VALUES (nextval('investigation_case_seq'), ?, ?)
-RETURNING case_id, month, status, analyst_notes,
-          created_at, updated_at
+            INSERT INTO investigation_cases (month, analyst_notes)
+            VALUES (?, ?)
+            RETURNING case_id, month, status, analyst_notes,
+                      created_at, updated_at
         """, [month, notes]).fetchone()
 
         return jsonify({
@@ -296,11 +303,13 @@ RETURNING case_id, month, status, analyst_notes,
         }), 201
 
     except Exception:
-        app.logger.exception("Investigation cases API failed")
-        return jsonify({"error": "Unable to process investigation case."}), 500
-
+        app.logger.exception("Investigation cases POST failed")
+        return jsonify({
+            "error": "Unable to process investigation case."
+        }), 500
     finally:
-        con.close()
+        if con is not None:
+            con.close()
 
 
 @app.route("/api/investigation-cases/<int:case_id>", methods=["PATCH"])
