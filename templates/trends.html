@@ -88,6 +88,21 @@
                     <span>Records with no closure date</span>
                 </article>
             </section>
+            
+<section class="panel" id="monthlyInsights">
+    <div class="panel-header">
+        <div>
+            <p class="eyebrow">AUTOMATED ANALYSIS</p>
+            <h2>Month-over-Month Insights</h2>
+        </div>
+        <span class="mini-tag">Live KPI Analysis</span>
+    </div>
+
+    <div id="insightsContent">
+        <p>Analyzing monthly KPI data...</p>
+    </div>
+</section>
+
 
             <section class="panel">
                 <div class="panel-header">
@@ -234,6 +249,7 @@
                     trendRows.length + " monthly records loaded from MetricTrust database.";
 
                 renderTrendChart();
+                renderMonthlyInsights();
             } catch (error) {
                 status.textContent =
                     "Could not load KPI data. Check the Flask server and monthly KPI API.";
@@ -298,6 +314,68 @@
         document.getElementById("trendMetric").addEventListener(
             "change", renderTrendChart
         );
+        
+function renderMonthlyInsights() {
+    const container = document.getElementById("insightsContent");
+
+    if (!container || !trendRows.length) {
+        if (container) {
+            container.textContent = "Monthly KPI data is not available yet.";
+        }
+        return;
+    }
+
+    const latest = trendRows[trendRows.length - 1];
+    const previous = trendRows.length > 1
+        ? trendRows[trendRows.length - 2]
+        : null;
+
+    if (!previous) {
+        container.innerHTML = `
+            <p>Latest month: <strong>${latest.month}</strong></p>
+            <p>Not enough monthly history to compare changes.</p>
+        `;
+        return;
+    }
+
+    const requestChange =
+        Number(latest.total_requests || 0) -
+        Number(previous.total_requests || 0);
+
+    const closureChange =
+        Number(latest.closure_rate_pct || 0) -
+        Number(previous.closure_rate_pct || 0);
+
+    const missingChange =
+        Number(latest.missing_closed_dates || 0) -
+        Number(previous.missing_closed_dates || 0);
+
+    const formatChange = value =>
+        `${value > 0 ? "+" : ""}${value.toFixed(2)}`;
+
+    container.innerHTML = `
+        <p><strong>Comparison:</strong> ${previous.month} → ${latest.month}</p>
+        <div class="signal-row">
+            <div class="signal-copy">
+                <strong>Request volume change</strong>
+                <p>${formatChange(requestChange)} requests</p>
+            </div>
+        </div>
+        <div class="signal-row">
+            <div class="signal-copy">
+                <strong>Closure rate change</strong>
+                <p>${formatChange(closureChange)} percentage points</p>
+            </div>
+        </div>
+        <div class="signal-row">
+            <div class="signal-copy">
+                <strong>Missing closure dates change</strong>
+                <p>${formatChange(missingChange)} records</p>
+            </div>
+        </div>
+    `;
+}
+
         async function loadMonthlyColumnData() {
     const status = document.getElementById("trendStatus");
     const canvas = document.getElementById("monthlyColumnChart");
