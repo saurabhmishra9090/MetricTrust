@@ -189,6 +189,10 @@
         grid-column: 1;
     }
 }
+#caseList .case-card[hidden],
+#caseList #caseFilterEmpty[hidden] {
+    display: none !important;
+}
 </style>
 
 </head>
@@ -422,6 +426,34 @@
         <h3>Investigation Cases</h3>
         <button type="button" id="refreshCasesBtn">Refresh Cases</button>
     </div>
+    
+<div class="case-filters">
+    <div class="case-filter-field">
+        <label for="caseSearchInput">Search cases</label>
+        <input
+            type="search"
+            id="caseSearchInput"
+            placeholder="Search by case ID or month..."
+        >
+    </div>
+
+    <div class="case-filter-field">
+        <label for="caseStatusFilter">Filter by status</label>
+        <select id="caseStatusFilter">
+            <option value="all">All Cases</option>
+            <option value="Open">Open</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Resolved">Resolved</option>
+        </select>
+    </div>
+
+    <button type="button" id="clearCaseFilters">Clear Filters</button>
+</div>
+
+<p id="caseFilterSummary" class="muted" role="status">
+    Showing all cases
+</p>
+
 
     <p id="caseMessage" class="muted" role="status"></p>
 
@@ -638,6 +670,72 @@ async function loadReconciliation() {
 }
 loadReconciliation();
 
+function filterInvestigationCases() {
+    const searchInput = document.getElementById("caseSearchInput");
+    const statusFilter = document.getElementById("caseStatusFilter");
+    const summary = document.getElementById("caseFilterSummary");
+    const caseCards = document.querySelectorAll("#caseList .case-card");
+
+    const searchTerm = searchInput.value.trim().toLowerCase();
+    const selectedStatus = statusFilter.value;
+
+    let visibleCount = 0;
+
+    caseCards.forEach(card => {
+        const heading = card.querySelector("h3");
+        const statusSelect = card.querySelector("select");
+
+        const caseText = heading ? heading.textContent.toLowerCase() : "";
+        const caseStatus = statusSelect ? statusSelect.value : "";
+
+        const matchesSearch = caseText.includes(searchTerm);
+        const matchesStatus =
+            selectedStatus === "all" || caseStatus === selectedStatus;
+
+        const shouldShow = matchesSearch && matchesStatus;
+
+        card.hidden = !shouldShow;
+
+        if (shouldShow) {
+            visibleCount++;
+        }
+    });
+
+    summary.textContent =
+        `Showing ${visibleCount} of ${caseCards.length} cases`;
+
+    let emptyMessage = document.getElementById("caseFilterEmpty");
+
+    if (visibleCount === 0 && caseCards.length > 0) {
+        if (!emptyMessage) {
+            emptyMessage = document.createElement("p");
+            emptyMessage.id = "caseFilterEmpty";
+            emptyMessage.className = "muted";
+            emptyMessage.textContent = "No cases match your filters.";
+            document.getElementById("caseList").appendChild(emptyMessage);
+        }
+        emptyMessage.hidden = false;
+    } else if (emptyMessage) {
+        emptyMessage.hidden = true;
+    }
+}
+
+document.getElementById("caseSearchInput").addEventListener(
+    "input",
+    filterInvestigationCases
+);
+
+document.getElementById("caseStatusFilter").addEventListener(
+    "change",
+    filterInvestigationCases
+);
+
+document.getElementById("clearCaseFilters").addEventListener("click", () => {
+    document.getElementById("caseSearchInput").value = "";
+    document.getElementById("caseStatusFilter").value = "all";
+    filterInvestigationCases();
+});
+
 async function loadInvestigationCases() {
     const caseList = document.getElementById("caseList");
     const message = document.getElementById("caseMessage");
@@ -735,6 +833,7 @@ async function loadInvestigationCases() {
 
             caseList.appendChild(card);
         });
+            filterInvestigationCases();
     } catch (error) {
         caseList.textContent = "Could not load investigation cases.";
         message.textContent = error.message;
