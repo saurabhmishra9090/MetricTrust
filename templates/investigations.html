@@ -7,6 +7,190 @@
     <title>MetricTrust | Investigations & Reconciliation</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+<style>
+/* Investigation Case Management redesign */
+#caseManagement {
+    margin-top: 28px;
+    padding: 28px;
+    background: #0b1720;
+    color: #e8f0f4;
+    border: 1px solid #233b47;
+    border-radius: 18px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+}
+
+#caseManagement h2 {
+    margin: 0 0 10px;
+    color: #f2f8fa;
+    font-size: 25px;
+    letter-spacing: -0.4px;
+}
+
+#caseManagement > p.muted {
+    color: #9aadb8;
+    margin-bottom: 24px;
+}
+
+#caseManagement #createCaseForm {
+    display: grid;
+    grid-template-columns: minmax(180px, 0.8fr) minmax(260px, 1.5fr);
+    gap: 10px 18px;
+    align-items: start;
+    padding: 22px;
+    background: #11232e;
+    border: 1px solid #29414d;
+    border-radius: 14px;
+}
+
+#caseManagement label {
+    display: block;
+    margin-bottom: 7px;
+    color: #b8cbd4;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+#caseManagement input,
+#caseManagement select,
+#caseManagement textarea {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    padding: 11px 12px;
+    color: #e8f0f4;
+    background: #0b1720;
+    border: 1px solid #35515f;
+    border-radius: 8px;
+    font: inherit;
+    outline: none;
+}
+
+#caseManagement textarea {
+    min-height: 90px;
+    resize: vertical;
+}
+
+#caseManagement input:focus,
+#caseManagement select:focus,
+#caseManagement textarea:focus {
+    border-color: #27d7c4;
+    box-shadow: 0 0 0 3px rgba(39, 215, 196, 0.12);
+}
+
+#caseManagement button {
+    padding: 10px 15px;
+    color: #eafffc;
+    background: #123c43;
+    border: 1px solid #247b7d;
+    border-radius: 8px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+#caseManagement button:hover {
+    background: #18545a;
+    transform: translateY(-1px);
+}
+
+#caseManagement button:disabled {
+    opacity: 0.55;
+    cursor: wait;
+    transform: none;
+}
+
+#caseManagement #createCaseForm button[type="submit"] {
+    grid-column: 1 / -1;
+    justify-self: start;
+    margin-top: 4px;
+    background: #0d9488;
+    border-color: #20cbb8;
+    color: #ffffff;
+}
+
+#caseManagement .case-list-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin: 28px 0 16px;
+}
+
+#caseManagement .case-list-header h3 {
+    margin: 0;
+    color: #e8f7f7;
+    font-size: 19px;
+}
+
+#caseManagement #refreshCasesBtn {
+    background: transparent;
+    border-color: #42606b;
+}
+
+#caseManagement #caseMessage {
+    margin: 12px 0;
+    color: #42d9c7;
+    font-size: 14px;
+}
+
+#caseManagement #caseList {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+    gap: 16px;
+}
+
+#caseManagement .case-card {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    min-width: 0;
+    padding: 20px;
+    background: #11232e;
+    border: 1px solid #29414d;
+    border-radius: 14px;
+}
+
+#caseManagement .case-card h3 {
+    margin: 0 0 4px;
+    padding-bottom: 12px;
+    color: #ecfdfb;
+    border-bottom: 1px solid #29414d;
+    font-size: 17px;
+}
+
+#caseManagement .case-card label {
+    margin: 0 0 -6px;
+}
+
+#caseManagement .case-card textarea {
+    min-height: 105px;
+}
+
+#caseManagement .case-card button {
+    align-self: flex-start;
+    margin-top: 2px;
+}
+
+@media (max-width: 600px) {
+    #caseManagement {
+        padding: 16px;
+    }
+
+    #caseManagement #createCaseForm {
+        grid-template-columns: 1fr;
+        padding: 14px;
+    }
+
+    #caseManagement #createCaseForm button[type="submit"] {
+        grid-column: 1;
+    }
+}
+</style>
+
 </head>
 <body>
 <div class="app-layout">
@@ -214,11 +398,14 @@
     <form id="createCaseForm">
         <label for="caseMonth">Investigation month</label>
         <input
-            type="month"
-            id="caseMonth"
-            name="month"
-            required
-        >
+        type="text"
+        id="caseMonth"
+        name="month"
+        placeholder="YYYY-MM (e.g. 2023-07)"
+        pattern="[0-9]{4}-(0[1-9]|1[0-2])"
+        title="Enter month in YYYY-MM format, e.g. 2023-07"
+        required
+>
 
         <label for="caseNotes">Analyst notes</label>
         <textarea
@@ -554,7 +741,9 @@ async function loadInvestigationCases() {
     }
 }
 
-document.getElementById("createCaseForm").addEventListener("submit", async event => {
+const createCaseForm = document.getElementById("createCaseForm");
+
+createCaseForm.addEventListener("submit", async event => {
     event.preventDefault();
 
     const month = document.getElementById("caseMonth").value;
@@ -586,7 +775,7 @@ document.getElementById("createCaseForm").addEventListener("submit", async event
         }
 
         message.textContent = `Case #${result.case_id} created successfully.`;
-        event.currentTarget.reset();
+       createCaseForm.reset();
         await loadInvestigationCases();
     } catch (error) {
         message.textContent = error.message;

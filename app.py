@@ -287,12 +287,13 @@ def investigation_cases_api():
     try:
         con = duckdb.connect(str(DB_FILE))
         result = con.execute("""
-            INSERT INTO investigation_cases (month, analyst_notes)
-            VALUES (?, ?)
-            RETURNING case_id, month, status, analyst_notes,
-                      created_at, updated_at
-        """, [month, notes]).fetchone()
-
+               INSERT INTO investigation_cases (
+        case_id, month, analyst_notes
+    )
+    VALUES (nextval('investigation_case_seq'), ?, ?)
+    RETURNING case_id, month, status, analyst_notes,
+              created_at, updated_at
+""", [month, notes]).fetchone()
         return jsonify({
             "case_id": result[0],
             "month": result[1],
