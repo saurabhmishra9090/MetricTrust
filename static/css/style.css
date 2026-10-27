@@ -1843,6 +1843,111 @@ body:has(.page-title-badge) .topbar .page-title-badge {
     opacity: 1;
 }
 
+/* MetricTrust: Premium KPI anomaly alert cards */
+#anomalyDetection .signal-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 18px 20px;
+    margin: 12px 0;
+    background: linear-gradient(135deg, #0B2029, #10343A);
+    border: 1px solid rgba(54, 217, 208, 0.25);
+    border-left: 4px solid #586F7C;
+    border-radius: 12px;
+    box-shadow: 0 5px 14px rgba(11, 32, 41, 0.12);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#anomalyDetection .signal-row:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 9px 20px rgba(11, 32, 41, 0.2);
+}
+
+#anomalyDetection .signal-copy {
+    flex: 1;
+    min-width: 0;
+}
+
+#anomalyDetection .signal-copy strong {
+    display: block;
+    color: #F4FBFF;
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+#anomalyDetection .signal-copy p {
+    color: #B8CDD5;
+    font-size: 12px;
+    margin: 4px 0;
+}
+
+#anomalyDetection .signal-copy small {
+    display: inline-block;
+    margin-top: 7px;
+    padding: 4px 9px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+#anomalyDetection .alert-severity-critical {
+    color: #FFB4AB;
+    background: rgba(255, 82, 82, 0.14);
+    border: 1px solid rgba(255, 82, 82, 0.35);
+}
+
+#anomalyDetection .alert-severity-warning {
+    color: #FFD580;
+    background: rgba(244, 185, 66, 0.13);
+    border: 1px solid rgba(244, 185, 66, 0.35);
+}
+
+#anomalyDetection .alert-severity-review {
+    color: #A9D8FF;
+    background: rgba(88, 111, 124, 0.2);
+    border: 1px solid rgba(169, 216, 255, 0.3);
+}
+
+/* Color-code anomaly cards by severity */
+#anomalyDetection .signal-row:has(.alert-severity-critical) {
+    border-left-color: #FF5252;
+}
+
+#anomalyDetection .signal-row:has(.alert-severity-warning) {
+    border-left-color: #F4B942;
+}
+
+#anomalyDetection .signal-row:has(.alert-severity-review) {
+    border-left-color: #69B7FF;
+}
+
+#anomalyDetection .alert-severity-critical {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 6px;
+    color: #FFB4AB;
+    background: rgba(255, 82, 82, 0.14);
+    border: 1px solid rgba(255, 82, 82, 0.35);
+}
+
+#anomalyDetection .alert-severity-warning {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 6px;
+    color: #FFD580;
+    background: rgba(244, 185, 66, 0.13);
+    border: 1px solid rgba(244, 185, 66, 0.35);
+}
+
+#anomalyDetection .alert-severity-review {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 6px;
+    color: #A9D8FF;
+    background: rgba(88, 111, 124, 0.2);
+    border: 1px solid rgba(169, 216, 255, 0.3);
+}
+
 
 
 

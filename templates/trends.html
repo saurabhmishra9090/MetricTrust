@@ -539,64 +539,66 @@ async function loadKPIAnomalies() {
                     ((currentRequests - previousRequests) /
                     previousRequests) * 100;
 
-                if (Math.abs(change) >= 5) {
-                    alerts.push({
-                        month: current.month,
-                        title: "Request volume anomaly",
-                        detail: `${change > 0 ? "+" : ""}${change.toFixed(2)}% change compared with the previous month.`,
-                        severity: "Review"
-                    });
-                }
-            }
-
-            const closureChange = currentClosure - previousClosure;
-
-            if (Math.abs(closureChange) >= 2) {
+                         if (Math.abs(change) >= 10) {
                 alerts.push({
                     month: current.month,
-                    title: "Closure rate anomaly",
-                    detail: `${closureChange > 0 ? "+" : ""}${closureChange.toFixed(2)} percentage-point change.`,
-                    severity: "Review"
-                });
-            }
-
-            if (currentMissing > previousMissing) {
-                alerts.push({
-                    month: current.month,
-                    title: "Data quality warning",
-                    detail: `Missing closure dates increased from ${previousMissing} to ${currentMissing}.`,
-                    severity: "Warning"
+                    title: "Request volume anomaly",
+                    detail: `${change > 0 ? "+" : ""}${change.toFixed(2)}% change compared with the previous month.`,
+                    severity: Math.abs(change) >= 20 ? "Critical" : "Warning"
                 });
             }
         }
 
-        if (alerts.length === 0) {
-            container.innerHTML =
-                "<p>No anomalies detected using the current thresholds.</p>";
-            return;
+        const closureChange = currentClosure - previousClosure;
+
+        if (Math.abs(closureChange) >= 2) {
+            alerts.push({
+                month: current.month,
+                title: "Closure rate anomaly",
+                detail: `${closureChange > 0 ? "+" : ""}${closureChange.toFixed(2)} percentage-point change.`,
+                severity: Math.abs(closureChange) >= 5 ? "Critical" : "Review"
+            });
         }
 
-        container.innerHTML = alerts.map(alert => `
-            <article class="signal-row">
-                <div class="signal-copy">
-                    <strong>${alert.title}</strong>
-                    <p>Month: ${alert.month}</p>
-                    <p>${alert.detail}</p>
-                    <small>Status: ${alert.severity}</small>
-                </div>
-            </article>
-        `).join("");
-
-    } catch (error) {
-        console.error("KPI anomaly detection error:", error);
-        container.textContent =
-            "Could not analyze KPI data. Check the Flask server.";
+        if (currentMissing > previousMissing) {
+            alerts.push({
+                month: current.month,
+                title: "Data quality warning",
+                detail: `Missing closure dates increased from ${previousMissing} to ${currentMissing}.`,
+                severity: currentMissing - previousMissing >= 3 ? "Critical" : "Warning"
+            });
+        }
     }
+
+    if (alerts.length === 0) {
+        container.innerHTML =
+            "<p>No anomalies detected using the current thresholds.</p>";
+        return;
+    }
+
+    container.innerHTML = alerts.map(alert => `
+        <article class="signal-row">
+            <div class="signal-copy">
+                <strong>${alert.title}</strong>
+                <p>Month: ${alert.month}</p>
+                <p>${alert.detail}</p>
+              
+<small class="alert-severity-${alert.severity.toLowerCase()}">
+    Status: ${alert.severity}
+</small>
+            </div>
+        </article>
+    `).join("");
+
+} catch (error) {
+    console.error("KPI anomaly detection error:", error);
+    container.textContent =
+        "Could not analyze KPI data. Check the Flask server.";
+}
 }
 
 loadKPIAnomalies();
 
-    </script>
+</script>
 </body>
 </html>
-
