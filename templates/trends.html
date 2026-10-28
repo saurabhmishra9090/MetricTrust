@@ -541,11 +541,15 @@ async function loadKPIAnomalies() {
 
                          if (Math.abs(change) >= 10) {
                 alerts.push({
-                    month: current.month,
-                    title: "Request volume anomaly",
-                    detail: `${change > 0 ? "+" : ""}${change.toFixed(2)}% change compared with the previous month.`,
-                    severity: Math.abs(change) >= 20 ? "Critical" : "Warning"
-                });
+    month: current.month,
+    title: "Request volume anomaly",
+    detail: `Requests changed from ${previousRequests.toLocaleString()} to ${currentRequests.toLocaleString()} (${change > 0 ? "+" : ""}${change.toFixed(2)}% vs. previous month). Trigger threshold: ±10%.`,
+    previousValue: previousRequests,
+    currentValue: currentRequests,
+    change: change,
+    threshold: 10,
+    severity: Math.abs(change) >= 20 ? "Critical" : "Warning"
+});
             }
         }
 
@@ -562,11 +566,15 @@ async function loadKPIAnomalies() {
 
         if (currentMissing > previousMissing) {
             alerts.push({
-                month: current.month,
-                title: "Data quality warning",
-                detail: `Missing closure dates increased from ${previousMissing} to ${currentMissing}.`,
-                severity: currentMissing - previousMissing >= 3 ? "Critical" : "Warning"
-            });
+    month: current.month,
+    title: "Data quality warning",
+    detail: `Missing closure dates: ${previousMissing} → ${currentMissing} (+${currentMissing - previousMissing} records). Critical threshold: increase of 3 or more.`,
+    previousValue: previousMissing,
+    currentValue: currentMissing,
+    change: currentMissing - previousMissing,
+    threshold: 3,
+    severity: currentMissing - previousMissing >= 3 ? "Critical" : "Warning"
+});
         }
     }
 
