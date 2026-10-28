@@ -301,6 +301,22 @@
         <small>Months with no missing closure dates</small>
     </article>
 </div>
+<div class="quality-table-controls">
+    <input
+        type="search"
+        id="qualitySearch"
+        placeholder="Search by month (e.g. 2024-07)..."
+        aria-label="Search quality records by month"
+    >
+
+    <select id="qualityFilter" aria-label="Filter quality records">
+        <option value="all">All Months</option>
+        <option value="review">Needs Review</option>
+        <option value="clean">Clean Months</option>
+    </select>
+
+    <span id="qualityResultCount">36 records</span>
+</div>
         <div class="table-wrap">
             <table>
                 <thead>
@@ -328,12 +344,13 @@
     </p>
 </div>
 
-<script>
+<<script>
     let qualityData = [];
     let qualityChartInstance = null;
 
     const numberFormat = new Intl.NumberFormat("en-US");
 
+    // Load monthly KPI data from the Flask API.
     async function loadQualityData() {
         const status = document.getElementById("qualityStatus");
         const tbody = document.getElementById("qualityRows");
@@ -357,16 +374,13 @@
 
             qualityData = rows;
 
+            // Update KPI cards.
             const missingTotal = rows.reduce(
-                (sum, row) => sum + (Number(row.missing_closed_dates) || 0), 0
+                (sum, row) =>
+                    sum + (Number(row.missing_closed_dates) || 0),
+                0
             );
 
-            document.getElementById("recordCount").textContent =
-                numberFormat.format(rows.length);
-
-            document.getElementById("missingCount").textContent =
-                numberFormat.format(missingTotal);
-            // Update quality summary cards using actual API data
             const monthsToReview = rows.filter(
                 row => (Number(row.missing_closed_dates) || 0) > 0
             ).length;
@@ -374,6 +388,12 @@
             const cleanMonths = rows.filter(
                 row => (Number(row.missing_closed_dates) || 0) === 0
             ).length;
+
+            document.getElementById("recordCount").textContent =
+                numberFormat.format(rows.length);
+
+            document.getElementById("missingCount").textContent =
+                numberFormat.format(missingTotal);
 
             document.getElementById("qualityTotalRows").textContent =
                 numberFormat.format(rows.length);
@@ -384,14 +404,71 @@
             document.getElementById("qualityCleanMonths").textContent =
                 numberFormat.format(cleanMonths);
 
-            // Monthly aggregates cannot establish MT-001 transaction-level
-            // violations, so do not invent a violation count here.
+            // Monthly aggregates cannot establish transaction-level violations.
             document.getElementById("violationCount").textContent = "N/A";
 
-           tbody.innerHTML = rows.map((row, index) => {
-                const missing = Number(row.missing_closed_dates) || 0;
-                const total = Number(row.total_requests) || 0;
-                const closed = Number(row.closed_requests) || 0;
+            // Render the table and chart using the loaded data.
+            renderQualityTable();
+            renderQualityChart(rows);
+
+            status.textContent =
+                `Loaded ${rows.length} monthly records successfully.`;
+
+        } catch (error) {
+            console.error("Data quality page error:", error);
+
+            status.textContent =
+                `Unable to load data: ${error.message}`;
+
+            tbody.innerHTML =
+                '<tr><td colspan="7">Data could not be loaded. Check the Flask terminal and API response.</td></tr>';
+        }
+    }
+
+    // Keep this function outside loadQualityData so search and filter
+    // event listeners can call it.
+    function renderQualityTable() {
+        const tbody = document.getElementById("qualityRows");
+        const searchInput = document.getElementById("qualitySearch");
+        const filterInput = document.getElementById("qualityFilter");
+        const resultCount = document.getElementById("qualityResultCount");
+
+        const searchTerm = searchInput
+            ? searchInput.value.trim().toLowerCase()
+            : "";
+
+        const filterValue = filterInput
+            ? filterInput.value
+            : "all";
+
+        const filteredRows = qualityData.filter(row => {
+            const month = String(row.month ?? "").toLowerCase();
+            const missing = Number(row.missing_closed_dates) || 0;
+
+            const matchesSearch = month.includes(searchTerm);
+
+            const matchesFilter =
+                filterValue === "all" ||
+                (filterValue === "review" && missing > 0) ||
+                (filterValue === "clean" && missing === 0);
+
+            return matchesSearch && matchesFilter;
+        });
+
+        if (filteredRows.length === 0) {
+            tbody.innerHTML =
+                '<tr><td colspan="7">No matching records found.</td></tr>';
+        } else {
+            tbody.innerHTML = filteredRows.map((row, index) => {
+                const missing =
+                    Number(row.missing_closed_dates) || 0;
+
+                const total =
+                    Number(row.total_requests) || 0;
+
+                const closed =
+                    Number(row.closed_requests) || 0;
+
                 const rate = Number(row.closure_rate_pct);
 
                 const review = missing > 0
@@ -399,32 +476,40 @@
                     : '<span class="status">No missing dates</span>';
 
                 return `
-    <tr>
-        <td>${index + 1}</td>
-        <td>${escapeHtml(row.month ?? "Unknown")}</td>
-        <td>${numberFormat.format(total)}</td>
-        <td>${numberFormat.format(closed)}</td>
-        <td>${numberFormat.format(missing)}</td>
-        <td>${Number.isFinite(rate) ? rate.toFixed(2) + "%" : "N/A"}</td>
-        <td>${review}</td>
-    </tr>
-`;
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${escapeHtml(row.month ?? "Unknown")}</td>
+                        <td>${numberFormat.format(total)}</td>
+                        <td>${numberFormat.format(closed)}</td>
+                        <td>${numberFormat.format(missing)}</td>
+                        <td>${Number.isFinite(rate)
+                            ? rate.toFixed(2) + "%"
+                            : "N/A"}</td>
+                        <td>${review}</td>
+                    </tr>
+                `;
             }).join("");
+        }
 
-            renderQualityChart(rows);
-            status.textContent =
-                `Loaded ${rows.length} monthly records successfully.`;
-
-        } catch (error) {
-            console.error("Data quality page error:", error);
-            status.textContent = `Unable to load data: ${error.message}`;
-            tbody.innerHTML =
-                '<tr><td colspan="6">Data could not be loaded. Check the Flask terminal and API response.</td></tr>';
+        if (resultCount) {
+            resultCount.textContent =
+                `Showing ${filteredRows.length} of ${qualityData.length} records`;
         }
     }
 
+    // Render the monthly missing-date chart.
     function renderQualityChart(rows) {
         const canvas = document.getElementById("qualityChart");
+
+        if (!canvas) {
+            console.error("Quality chart canvas was not found.");
+            return;
+        }
+
+        if (typeof Chart === "undefined") {
+            console.error("Chart.js could not be loaded.");
+            return;
+        }
 
         if (qualityChartInstance) {
             qualityChartInstance.destroy();
@@ -432,41 +517,52 @@
 
         qualityChartInstance = new Chart(canvas, {
             type: "bar",
+
             data: {
                 labels: rows.map(row => row.month),
+
                 datasets: [{
                     label: "Missing closure dates",
+
                     data: rows.map(row =>
                         Number(row.missing_closed_dates) || 0
                     ),
+
                     backgroundColor: "#B8DBD9",
                     borderColor: "#586F7C",
                     borderWidth: 1,
                     borderRadius: 4
                 }]
             },
-        
-plugins: [{
-    id: "lavenderBackground",
-    beforeDraw(chart) {
-        const { ctx, width, height } = chart;
 
-        ctx.save();
-        ctx.globalCompositeOperation = "destination-over";
-        ctx.fillStyle = "#E8E5F7";
-        ctx.fillRect(0, 0, width, height);
-        ctx.restore();
-    }
-}],
+            plugins: [{
+                id: "lavenderBackground",
+
+                beforeDraw(chart) {
+                    const { ctx, width, height } = chart;
+
+                    ctx.save();
+                    ctx.globalCompositeOperation = "destination-over";
+                    ctx.fillStyle = "#E8E5F7";
+                    ctx.fillRect(0, 0, width, height);
+                    ctx.restore();
+                }
+            }],
 
             options: {
-            
                 responsive: true,
                 maintainAspectRatio: false,
+
                 plugins: {
-                    legend: { display: true },
-                    tooltip: { enabled: true }
+                    legend: {
+                        display: true
+                    },
+
+                    tooltip: {
+                        enabled: true
+                    }
                 },
+
                 scales: {
                     x: {
                         ticks: {
@@ -474,8 +570,10 @@ plugins: [{
                             maxRotation: 45
                         }
                     },
+
                     y: {
                         beginAtZero: true,
+
                         title: {
                             display: true,
                             text: "Missing dates"
@@ -486,6 +584,7 @@ plugins: [{
         });
     }
 
+    // Escape values before inserting them into HTML.
     function escapeHtml(value) {
         return String(value).replace(/[&<>"']/g, char => ({
             "&": "&amp;",
@@ -496,6 +595,7 @@ plugins: [{
         })[char]);
     }
 
+    // Export the complete loaded dataset to CSV.
     function exportQualityCsv() {
         if (!qualityData.length) {
             alert("No quality data is available to export.");
@@ -512,9 +612,11 @@ plugins: [{
 
         const csv = [
             headers.join(","),
+
             ...qualityData.map(row =>
                 headers.map(key => {
                     const value = row[key] ?? "";
+
                     return `"${String(value).replace(/"/g, '""')}"`;
                 }).join(",")
             )
@@ -526,18 +628,31 @@ plugins: [{
 
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
+
         link.href = url;
         link.download = "metrictrust_quality_report.csv";
+
+        document.body.appendChild(link);
         link.click();
+        link.remove();
+
         URL.revokeObjectURL(url);
     }
 
+    // Register button and filter events.
     document.getElementById("refreshBtn")
         .addEventListener("click", loadQualityData);
 
     document.getElementById("exportBtn")
         .addEventListener("click", exportQualityCsv);
 
+    document.getElementById("qualitySearch")
+        ?.addEventListener("input", renderQualityTable);
+
+    document.getElementById("qualityFilter")
+        ?.addEventListener("change", renderQualityTable);
+
+    // Initial page load.
     loadQualityData();
 </script>
 </body>
