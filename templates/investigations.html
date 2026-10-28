@@ -621,9 +621,12 @@ async function loadInvestigations() {
             ? payload
             : (payload.data || payload.records || []);
 
-        document.getElementById("candidateCount").textContent =
-            numberFormat(investigationData.length);
+        const candidateTotal = investigationData.filter(row =>
+    Number(row.missing_closed_dates || 0) > 0
+).length;
 
+document.getElementById("candidateCount").textContent =
+    numberFormat(candidateTotal);
         const missingTotal = investigationData.reduce(
             (sum, row) => sum + Number(row.missing_closed_dates || 0), 0
         );

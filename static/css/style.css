@@ -1995,6 +1995,58 @@ body:has(.page-title-badge) .topbar .page-title-badge {
     }
 }
 
+/* MetricTrust: Investigation Details - Dark Theme Fix */
+#investigationDetails {
+    background: #0B2029 !important;
+    border: 1px solid #24434D !important;
+    color: #EAF4F6 !important;
+}
+
+#investigationDetails h2,
+#investigationDetails h3,
+#investigationDetails strong {
+    color: #EAF4F6 !important;
+}
+
+#investigationDetails p,
+#investigationDetails span,
+#investigationDetails label {
+    color: #B8CDD3 !important;
+}
+
+#investigationDetails .detail-grid > div {
+    background: linear-gradient(145deg, #0B2029 0%, #10383D 100%) !important;
+    border: 1px solid rgba(54, 217, 208, 0.4) !important;
+    border-left: 4px solid #36D9D0 !important;
+}
+
+#investigationDetails .detail-grid strong {
+    color: #B8CDD3 !important;
+}
+
+#investigationDetails .detail-grid p {
+    color: #36D9D0 !important;
+}
+
+#investigationDetails #detailInsightText,
+#investigationDetails #detailNextAction {
+    color: #D5E6EA !important;
+}
+
+#investigationDetails button {
+    background: #10383D !important;
+    color: #FFFFFF !important;
+    border: 1px solid #36D9D0 !important;
+}
+
+#investigationDetails button:hover {
+    background: #164850 !important;
+}
+#investigationDetails .severity-warning {
+    color: #92400E !important;
+    background: #FEF3C7 !important;
+    border: 1px solid #F59E0B !important;
+}
 
 
 
