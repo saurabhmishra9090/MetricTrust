@@ -585,12 +585,18 @@ async function loadKPIAnomalies() {
     <p class="recommended-action">
     <strong>Recommended Action:</strong>
     ${
-        alert.title === "Request volume anomaly"
-            ? "Compare request volume with previous months and check for unusual spikes or drops."
-            : alert.title === "Closure rate anomaly"
-            ? "Review closure performance and investigate changes in processing time or unresolved requests."
-            : "Inspect records with missing closure dates and validate the source data for the affected month."
-    }
+    alert.title === "Request volume anomaly"
+        ? alert.severity === "Critical"
+            ? "URGENT: Investigate the unusual request volume change and validate the underlying records."
+            : "Compare request volume with previous months and check for unusual spikes or drops."
+        : alert.title === "Closure rate anomaly"
+            ? alert.severity === "Critical"
+                ? "URGENT: Investigate the closure rate change and identify the cause of the performance shift."
+                : "Review closure performance and investigate changes in processing time or unresolved requests."
+            : alert.severity === "Critical"
+                ? "URGENT: Inspect missing closure dates immediately and validate the affected source records."
+                : "Review records with missing closure dates and validate the source data for the affected month."
+}
 </p>
               
 <small class="alert-severity-${alert.severity.toLowerCase()}">
