@@ -2245,6 +2245,48 @@ body:has(.page-title-badge) {
 body:has(.page-title-badge) .main-content {
     background: transparent !important;
 }
+/* Quality Review Summary Cards */
+.quality-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    margin: 22px 0;
+}
 
+.quality-summary-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 24px;
+    background: linear-gradient(135deg, #0B2029, #103A3B);
+    border: 1px solid #24535D;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(7, 30, 38, 0.12);
+}
+
+.quality-summary-card span {
+    color: #B8CDD5;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.quality-summary-card strong {
+    color: #FFFFFF;
+    font-size: 32px;
+    line-height: 1.2;
+}
+
+.quality-summary-card small {
+    color: #B8CDD5;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+@media (max-width: 800px) {
+    .quality-summary-grid {
+        grid-template-columns: 1fr;
+    }
+}
 
 

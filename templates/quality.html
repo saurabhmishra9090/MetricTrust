@@ -282,6 +282,25 @@
             These are monthly aggregate checks, not transaction-level proof
             of individual data errors.
         </p>
+        <div class="quality-summary-grid">
+    <article class="quality-summary-card">
+        <span>Total Monthly Records</span>
+        <strong id="qualityTotalRows">—</strong>
+        <small>Monthly records loaded</small>
+    </article>
+
+    <article class="quality-summary-card">
+        <span>Months to Review</span>
+        <strong id="qualityReviewMonths">—</strong>
+        <small>Months with missing closure dates</small>
+    </article>
+
+    <article class="quality-summary-card">
+        <span>Clean Months</span>
+        <strong id="qualityCleanMonths">—</strong>
+        <small>Months with no missing closure dates</small>
+    </article>
+</div>
         <div class="table-wrap">
             <table>
                 <thead>
@@ -347,6 +366,23 @@
 
             document.getElementById("missingCount").textContent =
                 numberFormat.format(missingTotal);
+            // Update quality summary cards using actual API data
+            const monthsToReview = rows.filter(
+                row => (Number(row.missing_closed_dates) || 0) > 0
+            ).length;
+
+            const cleanMonths = rows.filter(
+                row => (Number(row.missing_closed_dates) || 0) === 0
+            ).length;
+
+            document.getElementById("qualityTotalRows").textContent =
+                numberFormat.format(rows.length);
+
+            document.getElementById("qualityReviewMonths").textContent =
+                numberFormat.format(monthsToReview);
+
+            document.getElementById("qualityCleanMonths").textContent =
+                numberFormat.format(cleanMonths);
 
             // Monthly aggregates cannot establish MT-001 transaction-level
             // violations, so do not invent a violation count here.
