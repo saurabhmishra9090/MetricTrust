@@ -172,14 +172,16 @@
 <div class="chart-container">
     <canvas id="monthlyColumnChart"></canvas>
 </div>
-<div class="chart-container" style="margin-top: 24px;">
+<div class="chart-container" style="margin-top: 24px; height: 360px; position: relative;">
     <h3>Monthly Unclosed Requests</h3>
     <p>Difference between total requests and closed requests each month.</p>
-    <canvas id="unclosedRequestsChart"></canvas>
+    <div style="height: 270px; position: relative;">
+        <canvas id="unclosedRequestsChart"></canvas>
+    </div>
 </div>
 
 
-                <p class="footnote">
+              <p class="footnote" style="margin-top: 32px; padding-bottom: 12px; clear: both;">
                     Sample-based metrics are not citywide request totals.
                     Investigate changes before attributing a cause.
                 </p>
@@ -497,6 +499,7 @@ function renderMonthlyInsights() {
                 }
             }
         });
+        
 
         console.log("Monthly column chart rendered successfully.");
     } catch (error) {
@@ -507,11 +510,92 @@ function renderMonthlyInsights() {
         }
     }
 }
+async function loadUnclosedRequestsChart() {
+    const canvas = document.getElementById("unclosedRequestsChart");
 
+    if (!canvas) {
+        console.error("Unclosed requests chart canvas not found.");
+        return;
+    }
+
+    try {
+        const response = await fetch("/api/monthly-kpis");
+
+        if (!response.ok) {
+            throw new Error(`API returned ${response.status}`);
+        }
+
+        const rows = await response.json();
+
+        if (!Array.isArray(rows) || rows.length === 0) {
+            throw new Error("No monthly KPI data available.");
+        }
+
+        if (window.unclosedRequestsChart instanceof Chart) {
+            window.unclosedRequestsChart.destroy();
+        }
+
+        window.unclosedRequestsChart = new Chart(canvas, {
+            type: "bar",
+            data: {
+                labels: rows.map(row => row.month),
+                datasets: [{
+                    label: "Unclosed requests",
+                    data: rows.map(row =>
+                        Math.max(
+                            0,
+                            Number(row.total_requests || 0) -
+                            Number(row.closed_requests || 0)
+                        )
+                    ),
+                    backgroundColor: "#F4B942",
+                    borderColor: "#D99A20",
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: "top"
+                    },
+                    tooltip: {
+                        enabled: true
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            maxTicksLimit: 12,
+                            maxRotation: 45
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: "Unclosed requests"
+                        },
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+
+        console.log("Unclosed requests chart rendered successfully.");
+    } catch (error) {
+        console.error("Unclosed requests chart error:", error);
+    }
+}
 loadMonthlyColumnData();
+loadUnclosedRequestsChart();
 
 loadTrendData();
-
 async function loadKPIAnomalies() {
    const container = document.getElementById("anomalyContent");
 
