@@ -2048,6 +2048,203 @@ body:has(.page-title-badge) .topbar .page-title-badge {
     border: 1px solid #F59E0B !important;
 }
 
+/* MetricTrust - Definition Registry Table Layout */
+.definition-table-wrap {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    border-radius: 14px;
+    scrollbar-width: thin;
+    scrollbar-color: #587780 #0B2029;
+}
+
+.definition-table-wrap table {
+    width: 100%;
+    min-width: 1250px;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+.definition-table-wrap th,
+.definition-table-wrap td {
+    padding: 16px 14px;
+    vertical-align: middle;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    line-height: 1.6;
+}
+
+.definition-table-wrap th:nth-child(1),
+.definition-table-wrap td:nth-child(1) {
+    width: 110px;
+    overflow-wrap: normal;
+    word-break: normal;
+}
+
+.definition-table-wrap th:nth-child(2),
+.definition-table-wrap td:nth-child(2) {
+    width: 125px;
+}
+
+.definition-table-wrap th:nth-child(3),
+.definition-table-wrap td:nth-child(3) {
+    width: 85px;
+}
+
+.definition-table-wrap th:nth-child(4),
+.definition-table-wrap td:nth-child(4) {
+    width: 250px;
+}
+
+.definition-table-wrap th:nth-child(5),
+.definition-table-wrap td:nth-child(5) {
+    width: 155px;
+}
+
+.definition-table-wrap th:nth-child(6),
+.definition-table-wrap td:nth-child(6),
+.definition-table-wrap th:nth-child(7),
+.definition-table-wrap td:nth-child(7) {
+    width: 140px;
+}
+
+.definition-table-wrap th:nth-child(8),
+.definition-table-wrap td:nth-child(8) {
+    width: 145px;
+}
+
+.definition-table-wrap th:nth-child(9),
+.definition-table-wrap td:nth-child(9) {
+    width: 280px;
+}
+
+/* Fix definition registry first-column overlap */
+.definition-table-wrap th:nth-child(1),
+.definition-table-wrap td:nth-child(1) {
+    width: 145px;
+    min-width: 145px;
+    padding-right: 18px;
+    white-space: normal;
+    overflow-wrap: normal;
+    word-break: normal;
+}
+
+.definition-table-wrap th:nth-child(2),
+.definition-table-wrap td:nth-child(2) {
+    width: 155px;
+    min-width: 155px;
+    padding-left: 18px;
+}
+
+/* MetricTrust - Definition History dark theme */
+body:has(.page-title-badge) .main-content > .panel {
+    background: #0B2029 !important;
+    color: #D8E8F8 !important;
+    border: 1px solid #24535A !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18) !important;
+}
+
+body:has(.page-title-badge) .main-content > .panel .notice {
+    background: #10383D !important;
+    color: #D8E8F8 !important;
+    border: 1px solid #24535A !important;
+}
+
+body:has(.page-title-badge) .main-content > .panel .notice strong {
+    color: #36D9D0 !important;
+}
+
+body:has(.page-title-badge) .table-wrap {
+    background: #0B2029 !important;
+    border-color: #24535A !important;
+    box-shadow: none !important;
+}
+
+body:has(.page-title-badge) .table-wrap tbody td {
+    color: #D8E8F8 !important;
+    border-color: #24535A !important;
+}
+
+body:has(.page-title-badge) .table-wrap tbody tr:nth-child(odd) {
+    background: #0B2029 !important;
+}
+
+body:has(.page-title-badge) .table-wrap tbody tr:nth-child(even) {
+    background: #10303A !important;
+}
+
+body:has(.page-title-badge) .main-content > .panel > p {
+    color: #AFC4D2 !important;
+}
+
+body:has(.page-title-badge) .main-content > .panel a {
+    color: #36D9D0 !important;
+}
+
+/* Definition History - readable registry table columns */
+body:has(.page-title-badge) .table-wrap table {
+    min-width: 1450px;
+    table-layout: fixed;
+}
+
+body:has(.page-title-badge) .table-wrap th:nth-child(1),
+body:has(.page-title-badge) .table-wrap td:nth-child(1) {
+    width: 150px;
+}
+
+body:has(.page-title-badge) .table-wrap th:nth-child(2),
+body:has(.page-title-badge) .table-wrap td:nth-child(2) {
+    width: 160px;
+}
+
+body:has(.page-title-badge) .table-wrap th:nth-child(3),
+body:has(.page-title-badge) .table-wrap td:nth-child(3) {
+    width: 90px;
+}
+
+body:has(.page-title-badge) .table-wrap th:nth-child(4),
+body:has(.page-title-badge) .table-wrap td:nth-child(4) {
+    width: 300px;
+}
+
+body:has(.page-title-badge) .table-wrap th:nth-child(5),
+body:has(.page-title-badge) .table-wrap td:nth-child(5) {
+    width: 180px;
+}
+
+body:has(.page-title-badge) .table-wrap th:nth-child(6),
+body:has(.page-title-badge) .table-wrap td:nth-child(6),
+body:has(.page-title-badge) .table-wrap th:nth-child(7),
+body:has(.page-title-badge) .table-wrap td:nth-child(7) {
+    width: 135px;
+}
+
+body:has(.page-title-badge) .table-wrap th:nth-child(8),
+body:has(.page-title-badge) .table-wrap td:nth-child(8) {
+    width: 140px;
+}
+
+body:has(.page-title-badge) .table-wrap th:nth-child(9),
+body:has(.page-title-badge) .table-wrap td:nth-child(9) {
+    width: 300px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.6;
+}
+
+body:has(.page-title-badge) .table-wrap td {
+    vertical-align: middle;
+    padding: 18px 14px;
+}
+/* MetricTrust - Definition History page background fix */
+body:has(.page-title-badge) {
+    background: #07131D !important;
+    color: #D8E8F8;
+}
+
+body:has(.page-title-badge) .main-content {
+    background: transparent !important;
+}
 
 
 
