@@ -50,6 +50,7 @@ violations = df[
     & (df["closed_date"].isna())
 ].copy()
 
+
 con = duckdb.connect(str(DB_FILE))
 
 try:
