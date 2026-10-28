@@ -111,6 +111,22 @@
         </div>
         <span class="mini-tag">Automated Alerts</span>
     </div>
+    <div class="anomaly-summary">
+    <article class="anomaly-summary-card">
+        <span>Total Alerts</span>
+        <strong id="totalAlertsCount">0</strong>
+    </article>
+
+    <article class="anomaly-summary-card">
+        <span>Critical Alerts</span>
+        <strong id="criticalAlertsCount">0</strong>
+    </article>
+
+    <article class="anomaly-summary-card">
+        <span>Warning / Review</span>
+        <strong id="otherAlertsCount">0</strong>
+    </article>
+</div>
 
     <div id="anomalyContent">
         <p>Scanning monthly KPI data for unusual changes...</p>
@@ -556,12 +572,16 @@ async function loadKPIAnomalies() {
         const closureChange = currentClosure - previousClosure;
 
         if (Math.abs(closureChange) >= 2) {
-            alerts.push({
-                month: current.month,
-                title: "Closure rate anomaly",
-                detail: `${closureChange > 0 ? "+" : ""}${closureChange.toFixed(2)} percentage-point change.`,
-                severity: Math.abs(closureChange) >= 5 ? "Critical" : "Review"
-            });
+           alerts.push({
+    month: current.month,
+    title: "Closure rate anomaly",
+    detail: `Closure rate changed from ${previousClosure.toFixed(2)}% to ${currentClosure.toFixed(2)}% (${closureChange > 0 ? "+" : ""}${closureChange.toFixed(2)} percentage points). Critical threshold: ±5 percentage points.`,
+    previousValue: previousClosure,
+    currentValue: currentClosure,
+    change: closureChange,
+    threshold: 2,
+    severity: Math.abs(closureChange) >= 5 ? "Critical" : "Review"
+});
         }
 
         if (currentMissing > previousMissing) {
@@ -578,11 +598,27 @@ async function loadKPIAnomalies() {
         }
     }
 
-    if (alerts.length === 0) {
-        container.innerHTML =
-            "<p>No anomalies detected using the current thresholds.</p>";
-        return;
-    }
+   if (alerts.length === 0) {
+    document.getElementById("totalAlertsCount").textContent = "0";
+    document.getElementById("criticalAlertsCount").textContent = "0";
+    document.getElementById("otherAlertsCount").textContent = "0";
+
+    container.innerHTML =
+        "<p>No anomalies detected using the current thresholds.</p>";
+    return;
+}
+const criticalCount = alerts.filter(
+    alert => alert.severity === "Critical"
+).length;
+
+document.getElementById("totalAlertsCount").textContent =
+    alerts.length;
+
+document.getElementById("criticalAlertsCount").textContent =
+    criticalCount;
+
+document.getElementById("otherAlertsCount").textContent =
+    alerts.length - criticalCount;
 
     container.innerHTML = alerts.map(alert => `
         <article class="signal-row">

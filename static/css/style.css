@@ -1947,7 +1947,53 @@ body:has(.page-title-badge) .topbar .page-title-badge {
     background: rgba(88, 111, 124, 0.2);
     border: 1px solid rgba(169, 216, 255, 0.3);
 }
+/* KPI Anomaly Summary Cards */
+#anomalyDetection .anomaly-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin: 22px 0;
+}
 
+#anomalyDetection .anomaly-summary-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px;
+    background: rgba(17, 42, 53, 0.85);
+    border: 1px solid rgba(103, 183, 191, 0.22);
+    border-radius: 14px;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+#anomalyDetection .anomaly-summary-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(42, 224, 207, 0.55);
+}
+
+#anomalyDetection .anomaly-summary-card span {
+    color: #A8BEC8;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+#anomalyDetection .anomaly-summary-card strong {
+    color: #F2F7FA;
+    font-size: 30px;
+    line-height: 1.2;
+    font-weight: 700;
+}
+
+@media (max-width: 640px) {
+    #anomalyDetection .anomaly-summary {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    #anomalyDetection .anomaly-summary-card {
+        padding: 16px;
+    }
+}
 
 
 
