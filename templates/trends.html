@@ -582,6 +582,16 @@ async function loadKPIAnomalies() {
                 <strong>${alert.title}</strong>
                 <p>Month: ${alert.month}</p>
                 <p>${alert.detail}</p>
+    <p class="recommended-action">
+    <strong>Recommended Action:</strong>
+    ${
+        alert.title === "Request volume anomaly"
+            ? "Compare request volume with previous months and check for unusual spikes or drops."
+            : alert.title === "Closure rate anomaly"
+            ? "Review closure performance and investigate changes in processing time or unresolved requests."
+            : "Inspect records with missing closure dates and validate the source data for the affected month."
+    }
+</p>
               
 <small class="alert-severity-${alert.severity.toLowerCase()}">
     Status: ${alert.severity}
