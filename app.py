@@ -481,6 +481,7 @@ def investigation_case_history(case_id):
     finally:
         if con is not None:
             con.close()
+
 @app.route("/api/assistant", methods=["POST"])
 def assistant_api():
     try:
@@ -506,38 +507,184 @@ def assistant_api():
             if total_requests else 0
         )
 
-        if "closure" in question and ("rate" in question or "overall" in question):
+        # Prepare numeric monthly KPI data
+        analysis = monthly.copy()
+
+        for column in [
+            "total_requests",
+            "closed_requests",
+            "missing_closed_dates"
+        ]:
+            analysis[column] = pd.to_numeric(
+                analysis[column], errors="coerce"
+            ).fillna(0)
+
+        analysis["closure_rate_pct"] = (
+            analysis["closed_requests"]
+            .div(analysis["total_requests"].replace(0, float("nan")))
+            .mul(100)
+        )
+
+        analysis = analysis.sort_values("month").reset_index(drop=True)
+        valid_rates = analysis.dropna(subset=["closure_rate_pct"])
+
+        # Highest and lowest closure-rate months
+        highest_month = None
+        lowest_month = None
+
+        if not valid_rates.empty:
+            highest_month = valid_rates.loc[
+                valid_rates["closure_rate_pct"].idxmax()
+            ]
+            lowest_month = valid_rates.loc[
+                valid_rates["closure_rate_pct"].idxmin()
+            ]
+
+        asks_lowest = any(word in question for word in [
+            "lowest", "minimum", "min closure", "worst month"
+        ])
+
+        asks_highest = any(word in question for word in [
+            "highest", "maximum", "max closure", "best month"
+        ])
+
+        asks_monthly_change = any(phrase in question for phrase in [
+            "month-over-month",
+            "month over month",
+            "compared with last month",
+            "compared to last month",
+            "monthly change",
+            "closure rate change"
+        ])
+
+        asks_missing_months = any(phrase in question for phrase in [
+            "which months",
+            "list months",
+            "months have missing",
+            "missing closure dates"
+        ])
+
+        # Highest / lowest closure rate
+        if asks_highest or asks_lowest:
+            selected_month = (
+                lowest_month if asks_lowest else highest_month
+            )
+
+            if selected_month is None:
+                answer = (
+                    "Closure rates cannot be calculated because "
+                    "no month has a positive request total."
+                )
+            else:
+                label = "lowest" if asks_lowest else "highest"
+                answer = (
+                    f"The {label} closure rate was in "
+                    f"{selected_month['month']}: "
+                    f"{selected_month['closure_rate_pct']:.2f}% "
+                    f"({int(selected_month['closed_requests']):,} closed out of "
+                    f"{int(selected_month['total_requests']):,} requests)."
+                )
+
+        # Month-over-month change
+        elif asks_monthly_change:
+            if len(valid_rates) < 2:
+                answer = (
+                    "At least two months with valid closure rates "
+                    "are required for a month-over-month comparison."
+                )
+            else:
+                previous = valid_rates.iloc[-2]
+                current = valid_rates.iloc[-1]
+                change = (
+                    current["closure_rate_pct"]
+                    - previous["closure_rate_pct"]
+                )
+
+                if change > 0:
+                    direction = "increased"
+                elif change < 0:
+                    direction = "decreased"
+                else:
+                    direction = "did not change"
+
+                answer = (
+                    f"From {previous['month']} to {current['month']}, "
+                    f"the closure rate {direction} by {abs(change):.2f} "
+                    f"percentage points, from "
+                    f"{previous['closure_rate_pct']:.2f}% to "
+                    f"{current['closure_rate_pct']:.2f}%. "
+                    "This compares the last two months with valid rates."
+                )
+
+        # List specific months with missing closure dates
+        elif asks_missing_months:
+            missing_months = analysis[
+                analysis["missing_closed_dates"] > 0
+            ]
+
+            if missing_months.empty:
+                answer = (
+                    "No months in the available monthly data "
+                    "report missing closure dates."
+                )
+            else:
+                details = "; ".join(
+                    f"{row['month']}: "
+                    f"{int(row['missing_closed_dates']):,}"
+                    for _, row in missing_months.iterrows()
+                )
+
+                answer = (
+                    f"{len(missing_months)} month(s) report missing "
+                    f"closure dates: {details}. These are monthly "
+                    "aggregate signals. Verify transaction-level evidence "
+                    "before concluding that a data-quality violation occurred."
+                )
+
+        # Overall closure rate
+        elif "closure" in question and (
+            "rate" in question or "overall" in question
+        ):
             answer = (
-                f"The aggregate closure rate across the available monthly sample "
-                f"is {closure_rate}%. There are {total_requests:,} requests and "
-                f"{closed_requests:,} closed requests in the monthly aggregates. "
+                f"The aggregate closure rate across the available "
+                f"monthly sample is {closure_rate}%. There are "
+                f"{total_requests:,} requests and {closed_requests:,} "
+                "closed requests in the monthly aggregates. "
                 "These are sample-based figures, not citywide totals."
             )
 
-        elif "missing" in question and ("date" in question or "closure" in question):
+        # Overall missing closure dates
+        elif "missing" in question and (
+            "date" in question or "closure" in question
+        ):
             answer = (
-                f"The monthly aggregates report {missing_dates} missing closure "
-                f"dates across {len(monthly)} months. This is a sum of monthly "
-                "counts; it does not by itself prove that every record is a "
-                "data-quality violation. Review transaction-level evidence "
-                "before concluding that a closed record is missing its date."
+                f"The monthly aggregates report {missing_dates:,} "
+                f"missing closure dates across {len(monthly)} months. "
+                "This is a sum of monthly counts, not proof of a "
+                "transaction-level data-quality violation."
             )
 
-        elif "investigat" in question or "kpi change" in question or "definition" in question:
+        # KPI investigation guidance
+        elif (
+            "investigat" in question
+            or "kpi change" in question
+            or "definition" in question
+        ):
             answer = (
-                "To investigate a KPI change: 1) compare the affected months, "
+                "To investigate a KPI change: "
+                "1) compare the affected months, "
                 "2) check data-quality signals and missing dates, "
-                "3) review the metric definition history, and "
+                "3) review metric definition history, and "
                 "4) reconcile against transaction-level records. "
-                "A signal identifies something to investigate; it does not "
-                "establish the root cause."
+                "A signal does not establish the root cause."
             )
 
         else:
             answer = (
-                "I can currently answer questions about overall closure rate, "
-                "missing closure dates, and how to investigate KPI changes. "
-                "Try one of those topics."
+                "I can answer questions about overall closure rate, "
+                "highest and lowest closure-rate months, "
+                "month-over-month changes, missing closure dates, "
+                "and KPI investigation guidance. Try one of those topics."
             )
 
         return jsonify({"answer": answer})
@@ -547,6 +694,11 @@ def assistant_api():
         return jsonify({
             "error": "Unable to analyze KPI data. Check the Flask terminal."
         }), 500
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
+
 
 
 
